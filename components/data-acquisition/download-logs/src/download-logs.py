@@ -39,14 +39,14 @@ def save_logs(start_time, end_time):
     client = get_client()
     pass
 
-def save_logs_from_today():
+def save_logs_from_today(log_type):
     client = get_client()
-    syslog_str = 'logstash-syslog-'
+    #syslog_str = 'logstash-syslog-'
     today_str = datetime.today().strftime('%Y.%m.%d')
-    outpath ='/data/{}'.format(today_str.replace('.','-'))
+    outpath ='/data/logs/{}'.format(today_str.replace('.','-'))
     if not os.path.exists(outpath):
-        os.mkdir(outpath)
-    index_name = syslog_str + today_str
+        os.makedirs(outpath)
+    index_name = log_type + today_str
 
     #get by system log severity
     f = 'syslog_severity'
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     if args.today != None:
-        save_logs_from_today()
+        save_logs_from_today(log_type='logstash-syslog-')
     else:
         print('missing arguements')
     #elif args.to == None:
