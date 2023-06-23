@@ -39,23 +39,43 @@ def save_logs(start_time, end_time):
     client = get_client()
     pass
 
-def save_logs_from_today(outpath):
+def save_logs_from_today():
     client = get_client()
     syslog_str = 'logstash-syslog-'
     today_str = datetime.today().strftime('%Y.%m.%d')
+    outpath ='/data/{}'.format(today_str.replace('.','-'))
+    if not os.path.exists(outpath):
+        os.mkdir(outpath)
     index_name = syslog_str + today_str
-    query = {
-            'size': 10000
-    }
-    response = client.search(
-                             body = query,
-                             index = index_name
-    )
-    json_file = json.dumps(response)
-    
-    with open(outpath,'w') as outfile:
-        json.dump(json_file, outfile)
-    
+
+    #get by system log severity
+    f = 'syslog_severity'
+    #get warnings
+    q_names = ['warning', 'crtical', 'error']
+    full_queries = []
+    #TODO: This might not take all of them
+    for q in q_names:
+        query = {
+            'size': 10000,
+            'query':{
+                'multi_match': {
+                    'query': q,
+                    'fields': [f]
+                }
+            }
+        }
+        full_queries.append(query)
+
+
+    for q_name, query in zip(q_names,full_queries):
+        response = client.search(
+                                body = query,
+                                index = index_name
+        )
+        #json_file = json.dumps(response)
+        log_out_path = os.path.join(outpath, q_name + '.json')
+        with open(log_out_path,'w') as outfile:
+            json.dump(response, outfile)
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -67,7 +87,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     if args.today != None:
-        save_logs_from_today('out.json')
+        save_logs_from_today()
     else:
         print('missing arguements')
     #elif args.to == None:
