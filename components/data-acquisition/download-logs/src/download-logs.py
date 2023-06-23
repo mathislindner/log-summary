@@ -42,7 +42,7 @@ def save_logs(start_time, end_time):
 def save_logs_from_today(log_type):
     client = get_client()
     today_str = datetime.today().strftime('%Y.%m.%d')
-    outpath ='/data/logs/{}'.format(today_str.replace('.','-'))
+    outpath ='/data/raw/logs/{}'.format(today_str.replace('.','-'))
     if not os.path.exists(outpath):
         os.makedirs(outpath)
     index_name = log_type + today_str
@@ -74,7 +74,7 @@ def save_logs_from_today(log_type):
         #json_file = json.dumps(response)
         log_out_path = os.path.join(outpath, q_name + '.json')
         with open(log_out_path,'w') as outfile:
-            json.dump(response, outfile)
+            json.dump(response, outfile, indent=4)
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

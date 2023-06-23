@@ -1,0 +1,1 @@
+#TODO: maybe add functionality to create 1 file per server name to be able to use an llm agent better
