@@ -41,7 +41,6 @@ def save_logs(start_time, end_time):
 
 def save_logs_from_today(log_type):
     client = get_client()
-    #syslog_str = 'logstash-syslog-'
     today_str = datetime.today().strftime('%Y.%m.%d')
     outpath ='/data/logs/{}'.format(today_str.replace('.','-'))
     if not os.path.exists(outpath):
