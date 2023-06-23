@@ -1,5 +1,21 @@
-import langchain
 import os
-from langchain.document_loaders import DirectoryLoader, TextLoader
+import glob
+import argparse
 
-loader = DirectoryLoader(DRIVE_FOLDER, glob='**/*.json', show_progress=True, loader_cls=TextLoader)
+#TODO: for now we just move the files to processed
+def preprocess():
+    alarms_json_by_receiver = os.path.join('/data', 'raw', 'alarms', 'by_receiver')
+    move_to_processed(alarms_json_by_receiver, processed_path='/data/processed/alarms/by_receiver')
+    return
+
+def move_to_processed(alarms_json_by_receiver, processed_path):
+    if not os.path.exists(processed_path):
+        os.makedirs(processed_path)
+    for file in glob.glob(os.path.join(alarms_json_by_receiver, '*.json')):
+        os.rename(file, os.path.join(processed_path, os.path.basename(file)))
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    args = parser.parse_args()
+
+    preprocess()
