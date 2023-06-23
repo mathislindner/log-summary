@@ -5,7 +5,8 @@ import argparse
 #TODO: for now we just move the files to processed
 def preprocess():
     alarms_json_by_receiver = os.path.join('/data', 'raw', 'alarms', 'by_receiver')
-    move_to_processed(alarms_json_by_receiver, processed_path='/data/processed/alarms/by_receiver')
+    #create vectorstore
+    
     return
 
 def move_to_processed(alarms_json_by_receiver, processed_path):
