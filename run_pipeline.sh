@@ -3,7 +3,7 @@
 #create volume to share between the dockerfiles
 #docker volume create --name temp-vol
 TEMP_VOL="/data:/data"
-
+current_dir=$(pwd)
 #run data acquisition
 
     #get the logs
@@ -14,7 +14,7 @@ TEMP_VOL="/data:/data"
         '
 
     #get the alarms
-        cd /root/log-summary/components/data-acquisition/download-alarms
+        cd $current_dir/components/data-acquisition/download-alarms
         docker build -t alarm-downloader .
         docker run --network=host -v $TEMP_VOL alarm-downloader
 
@@ -22,10 +22,12 @@ TEMP_VOL="/data:/data"
 ###########################################################################################
 #run preprocessing
     #preprocess alarms for langchain
-        cd /root/log-summary/components/data-preprocessing/preprocess-alarms-for-langchain
+        cd $current_dir/components/data-preprocessing/preprocess-alarms-for-langchain
         docker build -t alarm-preprocessor .
         docker run --network=host -v $TEMP_VOL alarm-preprocessor
 
 #run base inference
-
-#run 
+    #run langchain
+        cd $current_dir/components/model-inference/infer-using-huggingface-model
+        docker build -t huggingface-inference .
+        docker run --network=host -v $TEMP_VOL huggingface-inference

@@ -1,10 +1,10 @@
-#pip -q install langchain huggingface_hub transformers sentence_transformers
+#langchain imports
 import langchain
 from langchain.document_loaders import DirectoryLoader, TextLoader, JSONLoader
 from langchain.llms import HuggingFacePipeline
 from langchain import PromptTemplate, LLMChain
-
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, AutoModelForSeq2SeqLM
+#regular imports
 import os
 import argparse
 
@@ -33,10 +33,13 @@ def  get_prompt():
     #mention that it needs to write a short answer that summarizes the json file
     #mention that the data is about alarms that are can be caused by ...,...,...
     template = """
-            {question}
+            based on this json document, summarize the issue that caused the alarm in bullet points.
             """
-    prompt = PromptTemplate(template, input_variables=['question'])
+    prompt = PromptTemplate(template, input_variables=[])
     return prompt
+
+def summarize_document(document, llm_chain):
+    return llm_chain.run(input_documents = document)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -54,10 +57,8 @@ if __name__ == '__main__':
     #TODO: add memory to the prompt of alarms that already have been summarized
     prompt = get_prompt()
     llm_chain = get_llm_chain(prompt, local_llm)
-    alarm_receiver = 'test'
-    answer = llm_chain.run(input_documents = test_doc)
-
-    #get a summary of each document
-
-    #save the summary of each document
+    answers = []
+    for document in documents:
+        answers.append(summarize_document(document, llm_chain))
+    print(answers)
 
