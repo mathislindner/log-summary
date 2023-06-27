@@ -1,5 +1,5 @@
 #!/bin/bash
-
+export https_proxy=http://lbproxy.cern.ch:8080 ; export http_proxy=http://lbproxy.cern.ch:8080 ; export no_proxy="localhost,127.0.0.1,*.cern.ch,*.local,10.0.0.0/8"
 #create volume to share between the dockerfiles
 #docker volume create --name temp-vol
 TEMP_VOL="/data:/data"
@@ -30,4 +30,4 @@ current_dir=$(pwd)
     #run langchain
         cd $current_dir/components/model-inference/infer-using-huggingface-model
         docker build -t huggingface-inference .
-        docker run --network=host -v $TEMP_VOL huggingface-inference
+        docker run  --network=host --device nvidia.com/gpu=all huggingface-inference

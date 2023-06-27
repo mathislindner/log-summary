@@ -15,8 +15,9 @@ def get_documents():
     return documents
 
 def get_model(model_id):
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
-    model = AutoModelForCausalLM.from_pretrained(model_id, load_in_8bit = True)
+    device = "cuda:0"
+    tokenizer = AutoTokenizer.from_pretrained(model_id).to(device)
+    model = AutoModelForCausalLM.from_pretrained(model_id).to(device)
     pipe = pipeline('text2text-generation', 
                     model=model, 
                     tokenizer=tokenizer, 
@@ -41,7 +42,10 @@ def  get_prompt():
 def summarize_document(document, llm_chain):
     return llm_chain.run(input_documents = document)
 
+
 if __name__ == '__main__':
+    import torch
+    print(torch._C._cuda_getDeviceCount())
     parser = argparse.ArgumentParser()
     args = parser.parse_args()
 
