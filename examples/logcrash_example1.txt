@@ -1,0 +1,48 @@
+query = """
+**Prompt:**
+Given the following log entries, please analyze the root cause of the crash that occurred in the system:
+
+```
+START OF LOGS
+[2023-06-22 12:00:00] Alpha: Initializing system...
+[2023-06-22 12:00:01] Alpha: System initialization complete. Awaiting connections.
+
+[2023-06-22 12:00:02] Beta: Connecting to Alpha
+[2023-06-22 12:00:02] Beta: Connection established with Alpha. Initializing system
+
+[2023-06-22 12:00:03] Gamma: Connecting to Alpha
+[2023-06-22 12:00:03] Gamma: Connection established with Alpha. Initializing system
+
+[2023-06-22 12:01:00] Alpha: ERROR - Internal process crashed due to a critical error.
+[2023-06-22 12:01:00] Alpha: Initiating system restart
+
+[2023-06-22 12:01:01] Beta: WARNING - Connection with Alpha lost.
+[2023-06-22 12:01:01] Beta: Attempting to reconnect to Alpha
+
+[2023-06-22 12:01:02] Gamma: WARNING - Connection with Alpha lost.
+[2023-06-22 12:01:02] Gamma: Attempting to reconnect to Alpha
+
+[2023-06-22 12:01:10] Alpha: System restart complete. Awaiting connections.
+
+[2023-06-22 12:01:11] Beta: WARNING - Failed to reconnect to Alpha. Retrying
+
+[2023-06-22 12:01:12] Gamma: WARNING - Failed to reconnect to Alpha. Retrying
+
+[2023-06-22 12:02:00] Alpha: ERROR - Internal process crashed again due to the same critical error.
+[2023-06-22 12:02:00] Alpha: Initiating system shutdown...
+
+[2023-06-22 12:02:01] Beta: ERROR - Connection lost with Alpha. Aborting operations
+
+[2023-06-22 12:02:02] Gamma: ERROR - Connection lost with Alpha. Aborting operations
+
+[2023-06-22 12:02:03] Beta: WARNING - Alpha is down. Alerting system administrator
+
+[2023-06-22 12:02:03] Gamma: WARNING - Alpha is down. Alerting system administrator
+```
+
+**Question:** Based on the provided logs, what do you think caused the crash in the system?
+
+**Answer:**
+"""
+
+[{'generated_text': 'Alpha crashed due to a critical error.'}]

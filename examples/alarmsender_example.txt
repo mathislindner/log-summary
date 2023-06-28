@@ -1,0 +1,36 @@
+INSTRUCTION: The following json is describes an alarm that is triggered by who?
+JSON:{
+    "alerts": [
+        {
+            "annotations": {
+                "description": "kube52.lbdaq.cern.ch is using too much ram 76.39337480022117%.",
+                "summary": "kube52.lbdaq.cern.ch is using too much ram."
+            },
+            "endsAt": "2023-06-27T11:42:01.277Z",
+            "fingerprint": "fc029f0c45c24ac2",
+            "receivers": [
+                {
+                    "name": "aris"
+                }
+            ],
+            "startsAt": "2023-06-22T06:54:01.277Z"
+            "updatedAt": "2023-06-27T11:38:01.281Z",
+            "generatorURL": "http://kubeprom.lbdaq.cern.ch:9090/graph?g0.expr=%28100+-+%28%28node_memory_MemAvailable_bytes+%2A+100%29+%2F+node_memory_MemTotal_bytes%29%29+%3E+75&g0.tab=1",
+            "labels": {
+                "alertname": "HighRamkUsage",
+                "instance": "kube52.lbdaq.cern.ch",
+                "job": "node-exporter",
+                "notification_class": "aris",
+                "resolve": "true",
+                "severity": "critical"
+            }
+        }
+    ],
+    "labels": {
+        "alertname": "HighRamkUsage"
+    },
+    "receiver": {
+        "name": "aris"
+    }
+
+[{'generated_text': '[ kube52.lbdaq.cern.ch ]'}]
