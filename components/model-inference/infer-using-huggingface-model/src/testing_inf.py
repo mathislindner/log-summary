@@ -21,7 +21,7 @@ local_llm = HuggingFacePipeline(pipeline=pipe)
 doc_path="/data/raw/alarms/by_receiver/aris.json"
 loader = JSONLoader(file_path=doc_path, jq_schema=".alerts[].annotations.description")
 document = loader.load()
-document = [Document(page_content='server a is overloaded with requests', metadata={'source': '/aris.json', 'seq_num': 1})]
+document = [Document(page_content='server a is overloaded with requests', metadata={'seq_num': 1})]
 print(document)
 
 query="How can I fix the problem that is in the document?"
