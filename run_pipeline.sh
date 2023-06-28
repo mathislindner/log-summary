@@ -3,7 +3,6 @@ export https_proxy=http://lbproxy.cern.ch:8080 ; export http_proxy=http://lbprox
 #create volume to share between the dockerfiles
 #docker volume create --name temp-vol
 TEMP_VOL="/data:/data"
-SRC_VOL="src:/app/src"
 current_dir=$(pwd)
 #run data acquisition
 
@@ -22,10 +21,17 @@ current_dir=$(pwd)
 
 ###########################################################################################
 #run preprocessing
+    #preprocess logs for langchain
+        cd $current_dir/components/data-preprocessing/preprocess-logs-for-langchain
+        src_path=$(pwd)"/src"
+        SRC_VOL=$src_path":/app/src"
+        docker build -t logs-preprocessor .
+        docker run --network=host -v $TEMP_VOL -v $SRC_VOL logs-preprocessor
+
     #preprocess alarms for langchain
         cd $current_dir/components/data-preprocessing/preprocess-alarms-for-langchain
         docker build -t alarm-preprocessor .
-        docker run --network=host -v $TEMP_VOL alarm-preprocessor
+        docker run --network=host -v $TEMP_VOL -v$SRC_VOL alarm-preprocessor
 
 #run base inference
     #run langchain
