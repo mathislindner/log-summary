@@ -36,5 +36,7 @@ current_dir=$(pwd)
 #run base inference
     #run langchain
         cd $current_dir/components/model-inference/infer-using-huggingface-model
+        src_path=$(pwd)"/src"
+        SRC_VOL=$src_path":/app/src"
         docker build -t huggingface-inference .
-        docker run  --network=host -v $TEMP_VOL -v $SRC_VOL --device nvidia.com/gpu=all huggingface-inference
+        docker run  --network=host -v $TEMP_VOL -v $SRC_VOL --device -it nvidia.com/gpu=all huggingface-inference
