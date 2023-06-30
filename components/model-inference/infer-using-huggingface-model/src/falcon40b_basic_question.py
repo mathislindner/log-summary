@@ -1,15 +1,13 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import transformers
-import torch
-
-torch_device = "cuda" if torch.cuda.is_available() else "cpu"
-print(torch_device)
 
 model_name = "tiiuae/falcon-40b-instruct"
 
-tokenizer = AutoTokenizer.from_pretrained(model_name, device_map="auto", trust_remote_code=True, load_in_8bit=True)
-model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", trust_remote_code=True, load_in_8bit=True)
-pipeline = transformers.pipeline(
+tokenizer = AutoTokenizer.from_pretrained("/data/models/falcon-40b-instruct-tokenizer", device_map="auto", trust_remote_code=True, load_in_8bit=True)
+model = AutoModelForCausalLM.from_pretrained("/data/models/falcon-40b-instruct-model", device_map="auto", trust_remote_code=True, load_in_8bit=True)
+
+
+pipe = transformers.pipeline(
     "text-generation",
     model=model,
     tokenizer=tokenizer,
@@ -18,7 +16,7 @@ pipeline = transformers.pipeline(
 )
 
 prompt = f"""
-what s the solution for each of the the hosts:
+write an email to system administrators about the following log problems:
 tfcfe01,p40_telegraf.service failed.,2023-06-28T00:38:10.518Z
 n2232702,libceph: mds0 (1)10.128.108.137:6801 wrong peer at address,2023-06-28T00:38:11.641Z
 n2232702,{7193}[Hardware Error]: event severity: corrected,2023-06-28T00:38:10.529Z
@@ -49,7 +47,7 @@ n2232702,{7194}[Hardware Error]:  fru_text: DIMM ??,2023-06-28T00:38:21.924Z
 n2232702,{7194}[Hardware Error]:   node: 0 ,2023-06-28T00:38:22.110Z
 """
 
-sequences = pipeline(
+sequences = pipe(
     prompt,
     max_length=1600,
     do_sample=True,

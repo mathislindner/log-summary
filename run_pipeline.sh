@@ -39,4 +39,4 @@ current_dir=$(pwd)
         src_path=$(pwd)"/src"
         SRC_VOL=$src_path":/app/src"
         docker build -t huggingface-inference .
-        docker run  --network=host -v $TEMP_VOL -v $SRC_VOL --device -it nvidia.com/gpu=all huggingface-inference
+        docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all huggingface-inference /bin/bash
