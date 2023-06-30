@@ -21,12 +21,13 @@ current_dir=$(pwd)
 
 ###########################################################################################
 #run preprocessing
-    #preprocess logs for langchain
+    #https://python.langchain.com/docs/modules/data_connection/vectorstores/integrations/chroma#basic-example-using-the-docker-container
+    #preprocess logs for langchain #TODO: create a database and use compose to run the database and the preprocessor together
         cd $current_dir/components/data-preprocessing/preprocess-logs-for-langchain
         src_path=$(pwd)"/src"
         SRC_VOL=$src_path":/app/src"
         docker build -t logs-preprocessor .
-        docker run --network=host -v $TEMP_VOL -v $SRC_VOL logs-preprocessor
+        docker run -it --network=host -v $TEMP_VOL -v $SRC_VOL logs-preprocessor /bin/bash
 
     #preprocess alarms for langchain
         cd $current_dir/components/data-preprocessing/preprocess-alarms-for-langchain
