@@ -6,6 +6,8 @@ import pandas as pd
 from langchain.document_loaders import DirectoryLoader
 from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.vectorstores import Chroma
+from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
+
 
 #options is a list of strings that are the keys of the json file
 def keep_only(json_log, options):
@@ -23,7 +25,6 @@ def keep_only(json_log, options):
         df["host"] = df["host"].apply(lambda x: x['hostname'])
     except:
         pass
-    print(df.head())
     return df
 
 def create_preprocessed_folder(raw_logs_path):
@@ -45,7 +46,7 @@ def save_json_log_to_df(path_to_json_log):
 def load_csv_as_langchain_docs(path_to_csvs):
     loader = DirectoryLoader(path_to_csvs, glob='**/*.csv', loader_cls=CSVLoader)
     documents = loader.load()
-
+    return documents
 
 
 if __name__ == '__main__':
@@ -67,8 +68,15 @@ if __name__ == '__main__':
     
     #TODO: for all the logs create embeddings for better retrieval
     #load csv as docs
+    print(preprocessed_logs_path)
     docs = load_csv_as_langchain_docs(preprocessed_logs_path)
+    #docs = [doc for doc in docs if doc!=None]
+
+    #embedding_model = INSTRUCTOR(model_name="hkunlp/instructor-xl", device="cuda")
     #create the embedding function
-    #embedding_function = get_embedding_function()
-    db = Chroma.from_documents(docs, embedding_function, persist_directory="/data/processed/chromadb")
-    #db.persist()
+    #sembedding_function = InstructorEmbeddingFunction(model=embedding_model)
+    #embedding_function = InstructorEmbeddingFunction(model_name="hkunlp/instructor-xl", device="cuda")
+    def_embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+
+    db = Chroma.from_documents(docs, def_embedding_function, persist_directory="/data/processed/chromadb")
+    db.persist()

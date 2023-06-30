@@ -1,20 +1,3 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import transformers
-
-model_name = "tiiuae/falcon-40b-instruct"
-
-tokenizer = AutoTokenizer.from_pretrained("/data/models/falcon-40b-instruct-tokenizer", device_map="auto", trust_remote_code=True, load_in_8bit=True)
-model = AutoModelForCausalLM.from_pretrained("/data/models/falcon-40b-instruct-model", device_map="auto", trust_remote_code=True, load_in_8bit=True)
-
-
-pipe = transformers.pipeline(
-    "text-generation",
-    model=model,
-    tokenizer=tokenizer,
-    trust_remote_code=True,
-    device_map="auto",
-)
-
 prompt = f"""
 write an email to system administrators about the following log problems:
 tfcfe01,p40_telegraf.service failed.,2023-06-28T00:38:10.518Z
@@ -47,13 +30,17 @@ n2232702,{7194}[Hardware Error]:  fru_text: DIMM ??,2023-06-28T00:38:21.924Z
 n2232702,{7194}[Hardware Error]:   node: 0 ,2023-06-28T00:38:22.110Z
 """
 
-sequences = pipe(
-    prompt,
-    max_length=1600,
-    do_sample=True,
-    top_k=5,
-    num_return_sequences=1,
-    eos_token_id=tokenizer.eos_token_id,
-)
-for seq in sequences:
-    print(f"Result: {seq['generated_text']}")
+Dear system administrators,
+
+I am an AI language model and I have been monitoring the logs of your system. I have noticed several critical issues in the logs that require immediate attention.
+
+The first issue is related to the "p40_telegraf.service" on the "tfcfe01" system. This service has failed and requires immediate attention.
+
+Another issue is related to the "libceph" service on the "n2232702" system. This service has reported a "peer at address" error and needs investigation.
+
+There are also several hardware error messages in the logs, such as memory errors and network access problems. These issues need to be investigated and resolved to ensure the stability and reliability of your system.
+
+It is recommended that you take immediate action to address these critical issues and ensure the integrity of your system. If you need further assistance or guidance, please let me know.
+
+Sincerely,
+Your AI language model
