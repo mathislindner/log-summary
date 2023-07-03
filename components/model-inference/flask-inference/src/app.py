@@ -31,3 +31,8 @@ if __name__ == '__main__':
         host='0.0.0.0',
         port=80
     )
+
+#prompt example
+"""
+curl -X POST localhost/query -H 'Content-Type: application/json' -d '{"userQuery":"Human: oh what a lovely day to be alive, what can you tell me about being alive? \n AI: "}'
+"""
