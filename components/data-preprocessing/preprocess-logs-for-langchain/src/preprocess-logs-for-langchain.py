@@ -6,7 +6,7 @@ import pandas as pd
 from langchain.document_loaders import DirectoryLoader
 from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.vectorstores import Chroma
-from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
+from langchain.embeddings.sentence_transformer import HuggingFaceEmbeddings
 
 
 #options is a list of strings that are the keys of the json file
@@ -39,6 +39,14 @@ def save_json_log_to_df(path_to_json_log):
         json_log = json.load(json_file)
     #keep only the message, server and time
     df_keep_only = keep_only(json_log, options)
+    #convert the timestamp to datetime if empty logs just ignore
+    try:
+        #convert the timestamp to datetime
+        df_keep_only["@timestamp"] = pd.to_datetime(df_keep_only["@timestamp"])
+        #sort by timestamp
+        df_keep_only = df_keep_only.sort_values(by=['@timestamp'])
+    except KeyError:
+        pass
     #save the json file in the preprocessed folder
     preprocessed_df_path = path_to_json_log.replace("raw", "preprocessed").replace(".json", ".csv")
     df_keep_only.to_csv(preprocessed_df_path, index=False)
@@ -51,7 +59,7 @@ def load_csv_as_langchain_docs(path_to_csvs):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--log_path", help="path to the logs folder")
+    parser.add_argument("--log_path", help="path to the logs folder", required=True)
     args = parser.parse_args()
 
     #get the list of logs
@@ -76,7 +84,11 @@ if __name__ == '__main__':
     #create the embedding function
     #sembedding_function = InstructorEmbeddingFunction(model=embedding_model)
     #embedding_function = InstructorEmbeddingFunction(model_name="hkunlp/instructor-xl", device="cuda")
-    def_embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    model_kwargs = {'device': 'cuda'}
+    def_embedding_function = HuggingFaceEmbeddings(
+                                                   model_name="all-MiniLM-L6-v2",
+                                                   model_kwargs=model_kwargs
+                                                   )
 
-    db = Chroma.from_documents(docs, def_embedding_function, persist_directory="/data/processed/chromadb")
+    db = Chroma.from_documents(docs, def_embedding_function, persist_directory="/data/preprocessed/chromadb")
     db.persist()
