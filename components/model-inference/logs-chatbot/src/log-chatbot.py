@@ -5,15 +5,18 @@
 # return the summary...
 
 from transformers import AutoTokenizer, AutoModelForCausalLM
+from langchain import HuggingFaceHub
+
 import transformers
 from langchain.agents import create_pandas_dataframe_agent
 import pandas as pd
 
 model_name = "tiiuae/falcon-40b-instruct"
 
-tokenizer = AutoTokenizer.from_pretrained("/data/models/falcon-40b-instruct-tokenizer", device_map="auto", trust_remote_code=True, load_in_8bit=True)
-model = AutoModelForCausalLM.from_pretrained("/data/models/falcon-40b-instruct-model", device_map="auto", trust_remote_code=True, load_in_8bit=True)
-
+#tokenizer = AutoTokenizer.from_pretrained("/data/models/falcon-40b-instruct-tokenizer", device_map="auto", trust_remote_code=True, load_in_8bit=True)
+#model = AutoModelForCausalLM.from_pretrained("/data/models/falcon-40b-instruct-model", device_map="auto", trust_remote_code=True, load_in_8bit=True)
+model_kwargs = {'device_map': 'auto', 'trust_remote_code': True, 'load_in_8bit': True}
+llm = HuggingFaceHub(model_name=model_name, model_kwargs=model_kwargs)
 pipe = transformers.pipeline(
     "text-generation",
     model=model,
