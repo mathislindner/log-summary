@@ -27,17 +27,24 @@ current_dir=$(pwd)
         src_path=$(pwd)"/src"
         SRC_VOL=$src_path":/app/src"
         docker build -t logs-preprocessor .
-        docker run -it --network=host -v $TEMP_VOL -v $SRC_VOL logs-preprocessor /bin/bash
+        docker run -it --network=host -v $TEMP_VOL -v $SRC_VOL --device nvidia.com/gpu=all logs-preprocessor /bin/bash
 
     #preprocess alarms for langchain
         cd $current_dir/components/data-preprocessing/preprocess-alarms-for-langchain
         docker build -t alarm-preprocessor .
         docker run --network=host -v $TEMP_VOL -v$SRC_VOL alarm-preprocessor
 
-#run base inference
-    #run langchain
+#run inference
+    #run base inference
         cd $current_dir/components/model-inference/infer-using-huggingface-model
         src_path=$(pwd)"/src"
         SRC_VOL=$src_path":/app/src"
         docker build -t huggingface-inference .
         docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all huggingface-inference /bin/bash
+
+    #run chatbot
+        cd $current_dir/components/model-inference/logs-chatbot
+        src_path=$(pwd)"/src"
+        SRC_VOL=$src_path":/app/src"
+        docker build -t logs-chatbot .
+        docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all logs-chatbot /bin/bash
