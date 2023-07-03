@@ -12,12 +12,12 @@ class ChatModel:
             tokenizer=self.tokenizer,
             trust_remote_code=True,
             device_map="auto",
-            max_length=300,
+            max_length=2048,
         )
 
     def get_reply(self, user_query):
         reply = self.pipe(user_query,
-                          max_length=1600,
+                          max_length=2048,
                           do_sample=True,
                           top_k=5,
                           num_return_sequences=1,
