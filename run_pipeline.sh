@@ -42,9 +42,24 @@ current_dir=$(pwd)
         docker build -t huggingface-inference .
         docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all huggingface-inference /bin/bash
 
-    #run chatbot
-        cd $current_dir/components/model-inference/logs-chatbot
+    #run flask server
+        cd $current_dir/components/model-inference/flask-inference
+        docker build -t logs-chatbot .
         src_path=$(pwd)"/src"
         SRC_VOL=$src_path":/app/src"
+        #docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all flask-inference /bin/bash
+        docker run --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all flask-inference
+
+    #run chatbot
+        cd $current_dir/components/model-inference/logs-chatbot
         docker build -t logs-chatbot .
+        src_path=$(pwd)"/src"
+        SRC_VOL=$src_path":/app/src"
         docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all logs-chatbot /bin/bash
+
+    #run local agent pipe
+        cd $current_dir/components/model-inference/logs-chatbot
+        docker build -t local-pandas .
+        src_path=$(pwd)"/src"
+        SRC_VOL=$src_path":/app/src"
+        docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all local-pandas /bin/bash

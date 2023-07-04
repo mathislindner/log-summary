@@ -3,13 +3,12 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
 from langchain.prompts import PromptTemplate
 
 def get_pipeline(model_id):
-    tokenizer = AutoTokenizer.from_pretrained(model_id, max_length=512)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_id, max_length=512, load_in_8bit=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_id, load_in_8bit=True, max_length=2048)
     pipe = pipeline(
         "text2text-generation",
         model=model, 
-        tokenizer=tokenizer, 
-        max_length=512,
+        tokenizer=tokenizer
     )
     return pipe
 
