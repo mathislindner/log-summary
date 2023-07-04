@@ -24,7 +24,7 @@ def query():
     query = request.json
     input_data = query['userQuery']
     bot_answer = clf.get_reply(input_data)
-    return json.dumps({'botResponse': bot_answer})
+    return json.dumps(bot_answer)
 
 if __name__ == '__main__':
     app.run(

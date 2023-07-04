@@ -4,28 +4,52 @@
 # summarize the logs
 # return the summary...
 
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from langchain import HuggingFaceHub
-
-import transformers
-from langchain.agents import create_pandas_dataframe_agent
+from typing import Any
+import requests
+import inspect
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple, Union
 import pandas as pd
+#agents and prompts
+from langchain.agents import create_pandas_dataframe_agent
+from langchain.prompts import PromptTemplate
+from langchain.agents import load_tools
+#llm class
+from langchain.llms.base import LLM
+from langchain.schema.messages import  BaseMessage
+from langchain.callbacks.manager import CallbackManagerForLLMRun
 
-model_name = "tiiuae/falcon-40b-instruct"
+class flaskllm(LLM):
+    #super().__init__()
+    ip : str = "localhost"
+    port : int = 80
+    suburl : str = "query"
+    endpoint_url :str = "http://{}:{}/{}".format(ip, port, suburl)
+    headers : str = {'Content-type': 'application/json'}
+    
+    def _call(
+        self,
+        messages: List[BaseMessage],
+        stop: Optional[List[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any
+    ) -> str:
+        data = {"userQuery": messages}
+        r = requests.post(self.endpoint_url, json=data, headers=self.headers, timeout=360)
+        print(r.json())
+        return r.json() #[0]["generated_text"]
+    
+    @property
+    def _llm_type(self) -> str:
+        return "flask-bot"
 
-#tokenizer = AutoTokenizer.from_pretrained("/data/models/falcon-40b-instruct-tokenizer", device_map="auto", trust_remote_code=True, load_in_8bit=True)
-#model = AutoModelForCausalLM.from_pretrained("/data/models/falcon-40b-instruct-model", device_map="auto", trust_remote_code=True, load_in_8bit=True)
-model_kwargs = {'device_map': 'auto', 'trust_remote_code': True, 'load_in_8bit': True}
-llm = HuggingFaceHub(model_name=model_name, model_kwargs=model_kwargs)
-pipe = transformers.pipeline(
-    "text-generation",
-    model=model,
-    tokenizer=tokenizer,
-    trust_remote_code=True,
-    device_map="auto",
-)
+llm = flaskllm(ip ="localhost", port = 80)
+
+tools = load_tools(['python_repl_ast'])
+
 
 df_errors= pd.read_csv("/data/preprocessed/logs/2023-06-28/error.csv")
 df_warnings= pd.read_csv("/data/preprocessed/logs/2023-06-28/warning.csv")
 
-agent = create_pandas_dataframe_agent(pipe, [df_errors, df_warnings])
+
+agent = create_pandas_dataframe_agent(llm, [df_errors, df_warnings])
+print(agent.run("get me one random error", verbose = True))

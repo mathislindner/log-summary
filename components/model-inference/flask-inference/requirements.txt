@@ -163,7 +163,6 @@ pluggy==1.2.0
 pooch==1.6.0
 portalocker==2.0.0
 poyo==0.5.0
-protobuf==3.20.3
 psutil==5.9.5
 py-cpuinfo==9.0.0
 py3nvml==0.2.7

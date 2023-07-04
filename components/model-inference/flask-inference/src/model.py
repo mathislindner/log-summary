@@ -17,10 +17,11 @@ class ChatModel:
 
     def get_reply(self, user_query):
         reply = self.pipe(user_query,
-                          max_length=2048,
                           do_sample=True,
-                          top_k=5,
+                          top_k=1,
                           num_return_sequences=1,
                           eos_token_id=self.tokenizer.eos_token_id,
         )
-        return reply 
+        #remove the prompt from the reply
+        print(reply)
+        return reply[0]['generated_text'].replace(user_query, "") 
