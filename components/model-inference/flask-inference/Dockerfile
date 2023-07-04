@@ -4,11 +4,15 @@ FROM huggingface/transformers-all-latest-gpu
 
 WORKDIR /app
 COPY . .
-RUN pip install flask
-RUN pip install flask_cors
-RUN pip install transformers
-RUN pip install torch torchvision torchaudio
-RUN pip install einops
-RUN pip install accelerate
-RUN pip install bitsandbytes
-RUN pip install xformers
+
+RUN pip install -r requirements.txt
+
+CMD python3 src/app.py
+#RUN pip install flask
+#RUN pip install flask_cors
+#RUN pip install transformers
+#RUN pip install torch torchvision torchaudio
+#RUN pip install einops
+#RUN pip install accelerate
+#RUN pip install bitsandbytes
+#RUN pip install xformers
