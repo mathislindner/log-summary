@@ -6,17 +6,8 @@ from langchain.prompts import PromptTemplate
 #from langchain.agents import create_pandas_dataframe_agent
 import pandas as pd
 
-model_name = "tiiuae/falcon-40b"
-tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
-model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True)
-#save model
-model.save_pretrained("/data/models/falcon-40b-model")
-#save tokenizer
-tokenizer.save_pretrained("/data/models/falcon-40b-tokenizer")
-
-
-model_id = "tiiuae/falcon-40b"
-model_name = "falcon-40b-instruct"
+#model_id = "tiiuae/falcon-40b"
+#model_name = "falcon-40b-instruct"
 model_name = "falcon-40b"
 tokenizer = AutoTokenizer.from_pretrained("/data/models/{model_name}-tokenizer", device_map="auto", trust_remote_code=True, load_in_8bit=True)
 model = AutoModelForCausalLM.from_pretrained("/data/models/{model_name}-model", device_map="auto", trust_remote_code=True, load_in_8bit=True)
