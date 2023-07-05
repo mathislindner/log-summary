@@ -58,7 +58,7 @@ current_dir=$(pwd)
         docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all logs-chatbot /bin/bash
 
     #run local agent pipe
-        cd $current_dir/components/model-inference/logs-chatbot
+        cd $current_dir/components/model-inference/local-pandas-agent-pipe
         docker build -t local-pandas .
         src_path=$(pwd)"/src"
         SRC_VOL=$src_path":/app/src"
