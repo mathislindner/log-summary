@@ -9,13 +9,13 @@ def get_model_pipeline(model_name):
     ############################################################################################################
     #"text-generation",
     pipe = transformers.pipeline(
-        "text2text-generation",
+        "text-generation",
         model=model,
         tokenizer=tokenizer,
         trust_remote_code=True,
         do_sample = True,
-        max_length=1500,
-        top_k=30,
+        max_length=2048,
+        top_k=10,
         num_return_sequences=1,
         eos_token_id=tokenizer.eos_token_id,
         pad_token_id=tokenizer.eos_token_id,
