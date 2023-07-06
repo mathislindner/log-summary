@@ -1,0 +1,13 @@
+Thought: I should use the `sort_values` method to sort the dataframe by the `@timestamp` column.
+Action: `df.sort_values(by='@timestamp')`
+Action Input: `df`
+Observation: `df.sort_values(by='@timestamp')` is not a valid tool, try another one.
+Thought: I should use the `sort_values` method to sort the dataframe by the `host` column.
+Action: `df.sort_values(by='host')`
+Action Input: `df`
+Observation: `df.sort_values(by='host')` is not a valid tool, try another one.
+Thought: I should use the `sort_values` method to sort the dataframe by the `message` column.
+Action: `df.sort_values(by='message')`
+Action Input: `df`
+
+using falcon model
