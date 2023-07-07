@@ -51,9 +51,36 @@ Observation:             host                                            message
 
 
 # llama-13b
- agent.run("give me the name of one random host")
-
  
 langchain.schema.output_parser.OutputParserException: Could not parse LLM output: `Thought: I will get the first random host from the list, which should be vedcsvss01
 Action (python_repl_ast): df.head().index = random.choice(range(len(df.columns)))
 Action Input: df.head().index = random.choice(range(len(df.columns))) # this does not look valid!`
+
+
+# llama_65b> Entering new  chain...
+Thought: I should use the `sort_values` function to sort the dataframe by timestamp.
+Action: python_repl_ast
+Action Input: df.sort_values(by='@timestamp')
+Observation:             host                                            message                        @timestamp
+0     vedcsvss01           Failed to start backup_pvssInst.service.  2023-06-28 00:00:34.726000+00:00
+1         crot03  iwlwifi 0000:00:14.3: BIOS contains WGDS but n...  2023-06-28 00:00:39.239000+00:00
+2       n4061401  ERROR: Checking for jobs... forbidden  ...  2023-06-28 00:00:55.171000+00:00
+3       n4061401  ERROR: Runner https://gitlab.cern.ch/zs...  2023-06-28 00:00:55.923000+00:00
+4       n4061401  ERROR: Checking for jobs... forbidden  ...  2023-06-28 00:01:55.200000+00:00
+...          ...                                                ...                               ...
+9995    n2232702  libceph: auth protocol 'cephx' mauth authentic...  2023-06-28 12:14:22.365000+00:00
+9996    n2232702  libceph: auth protocol 'cephx' mauth authentic...  2023-06-28 12:14:22.388000+00:00
+9997    n2232702  libceph: auth protocol 'cephx' mauth authentic...  2023-06-28 12:14:25.460000+00:00
+9998    n2232702  libceph: auth protocol 'cephx' mauth authentic...  2023-06-28 12:14:32.605000+00:00
+9999    n2232702  libceph: auth protocol 'cephx' mauth authentic...  2023-06-28 12:14:32.605000+00:00
+
+[10000 rows x 3 columns]
+Thought: I should use the `iloc` function to get the last row.
+Action: python_repl_ast
+Action Input: df.sort_values(by='@timestamp').iloc[-1]
+Observation: host                                                   n2232702
+message       libceph: auth protocol 'cephx' mauth authentic...
+@timestamp                     2023-06-28 12:14:32.605000+00:00
+Name: 9999, dtype: object
+Thought: I now know the final answer
+Final Answer: n2232702

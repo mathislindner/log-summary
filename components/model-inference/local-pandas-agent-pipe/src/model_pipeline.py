@@ -1,17 +1,26 @@
 import transformers
 from transformers import AutoTokenizer, AutoModelForCausalLM
 def get_model_pipeline(model_name):
+    model_path=f"/data/models/{model_name}-model"
+    tokenizer_path=f"/data/models/{model_name}-tokenizer"
+
     if model_name == "open_llama_13b":
         import torch
-        tokenizer = AutoTokenizer.from_pretrained(f"/data/models/{model_name}-tokenizer", device_map="auto", trust_remote_code=True, use_fast=False, torch_dtype=torch.float16)
-        model = AutoModelForCausalLM.from_pretrained(f"/data/models/{model_name}-model", device_map="auto", trust_remote_code=True,torch_dtype=torch.float16)
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, device_map="auto", trust_remote_code=True, use_fast=False, torch_dtype=torch.float16)
+        model = AutoModelForCausalLM.from_pretrained(model_path, device_map="auto", trust_remote_code=True,torch_dtype=torch.float16)
+    
+    elif model_name == "llama-65b":
+        model = AutoModelForCausalLM.from_pretrained(
+        model_path,
+        device_map="auto",
+        load_in_8bit=True,
+        max_memory= {i: '24000MB' for i in range(torch.cuda.device_count())},
+        )
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, device_map="auto", trust_remote_code=True, load_in_8bit=True)
     else:
-        tokenizer = AutoTokenizer.from_pretrained(f"/data/models/{model_name}-tokenizer", device_map="auto", trust_remote_code=True, load_in_8bit=True)
-        model = AutoModelForCausalLM.from_pretrained(f"/data/models/{model_name}-model", device_map="auto", trust_remote_code=True, load_in_8bit=True)
-    ############################################################################################################
-    #https://betterprogramming.pub/creating-my-first-ai-agent-with-vicuna-and-langchain-376ed77160e3
-    ############################################################################################################
-    #"text-generation",
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, device_map="auto", trust_remote_code=True, load_in_8bit=True)
+        model = AutoModelForCausalLM.from_pretrained(model_path, device_map="auto", trust_remote_code=True, load_in_8bit=True)
+        
     pipe = transformers.pipeline(
         "text-generation",
         model=model,

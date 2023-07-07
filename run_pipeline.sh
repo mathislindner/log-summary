@@ -63,3 +63,10 @@ current_dir=$(pwd)
         src_path=$(pwd)"/src"
         SRC_VOL=$src_path":/app/src"
         docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all local-pandas /bin/bash
+
+    #run LLAMA cpp
+        cd $current_dir/components/model-inference/local-pandas-agent-pipe
+        docker build -t llama-cpp .
+        src_path=$(pwd)"/src"
+        SRC_VOL=$src_path":/app/src"
+        docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all llama-cpp /bin/bash

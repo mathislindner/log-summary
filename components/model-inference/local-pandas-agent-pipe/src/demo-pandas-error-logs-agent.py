@@ -29,8 +29,8 @@ class MyAgent:
         # check on what the answer is (we need to do this because if it is a full dataframe, we cannot just put that into the llm)
         if first_chain_answer is str or first_chain_answer is int:
             #if it is a string or int, we can just put it into the llm and ask for a description
+            pass
     def first_chain(df_errors, question):
-    ############################################################################################################
     #first chain to translate english to a pandas query
         pandas_template = PromptTemplate(
             input_variables=["df_name","df_columns","question"],

@@ -8,8 +8,9 @@ import pandas as pd
 #model_id = "tiiuae/falcon-40b"
 #model_name = "falcon-40b-instruct"
 #model_name = "falcon-40b"
-model_name = "open_llama13b"
+#model_name = "open_llama13b"
 #model_name = "xgen-7b-8k-base"
+model_name = "llama-65b"
 
 pipe = get_model_pipeline(model_name)
 llm = HuggingFacePipeline(model_id = model_name, pipeline = pipe)
