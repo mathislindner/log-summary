@@ -7,7 +7,8 @@ import pandas as pd
 
 #model_id = "tiiuae/falcon-40b"
 #model_name = "falcon-40b-instruct"
-model_name = "falcon-40b"
+#model_name = "falcon-40b"
+model_name = "open_llama13b"
 #model_name = "xgen-7b-8k-base"
 
 pipe = get_model_pipeline(model_name)

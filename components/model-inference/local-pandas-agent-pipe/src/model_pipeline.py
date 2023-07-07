@@ -1,9 +1,13 @@
 import transformers
 from transformers import AutoTokenizer, AutoModelForCausalLM
-
 def get_model_pipeline(model_name):
-    tokenizer = AutoTokenizer.from_pretrained(f"/data/models/{model_name}-tokenizer", device_map="auto", trust_remote_code=True, load_in_8bit=True)
-    model = AutoModelForCausalLM.from_pretrained(f"/data/models/{model_name}-model", device_map="auto", trust_remote_code=True,  load_in_8bit=True, temperature=0.1)
+    if model_name == "open_llama_13b":
+        import torch
+        tokenizer = AutoTokenizer.from_pretrained(f"/data/models/{model_name}-tokenizer", device_map="auto", trust_remote_code=True, use_fast=False, torch_dtype=torch.float16)
+        model = AutoModelForCausalLM.from_pretrained(f"/data/models/{model_name}-model", device_map="auto", trust_remote_code=True,torch_dtype=torch.float16)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(f"/data/models/{model_name}-tokenizer", device_map="auto", trust_remote_code=True, load_in_8bit=True)
+        model = AutoModelForCausalLM.from_pretrained(f"/data/models/{model_name}-model", device_map="auto", trust_remote_code=True, load_in_8bit=True)
     ############################################################################################################
     #https://betterprogramming.pub/creating-my-first-ai-agent-with-vicuna-and-langchain-376ed77160e3
     ############################################################################################################

@@ -48,3 +48,12 @@ Observation:             host                                            message
 9999    n2232702  libceph: auth protocol 'cephx' mauth authentic...  2023-06-28 12:14:32.605000+00:00
 
 [10000 rows x 3 columns]
+
+
+# llama-13b
+ agent.run("give me the name of one random host")
+
+ 
+langchain.schema.output_parser.OutputParserException: Could not parse LLM output: `Thought: I will get the first random host from the list, which should be vedcsvss01
+Action (python_repl_ast): df.head().index = random.choice(range(len(df.columns)))
+Action Input: df.head().index = random.choice(range(len(df.columns))) # this does not look valid!`

@@ -8,8 +8,10 @@ import pandas as pd
 
 #model_id = "tiiuae/falcon-40b"
 model_name = "falcon-40b-instruct"
+#model_name = "open_llama_13b"
 #model_name = "falcon-40b"
-#model_name = "xgen-7b-8k-base"
+#model_name = "xgen-7b-8k-base"exit()
+#https://huggingface.co/TheBloke/airoboros-65B-gpt4-1.2-GGML
 
 pipe = get_model_pipeline(model_name)
 llm = HuggingFacePipeline(model_id = model_name, pipeline = pipe)
@@ -17,9 +19,10 @@ llm = HuggingFacePipeline(model_id = model_name, pipeline = pipe)
 df_errors= pd.read_csv("/data/preprocessed/logs/2023-06-28/error.csv")
 #df_warnings= pd.read_csv("/data/preprocessed/logs/2023-06-28/warning.csv")
 
-agent = create_pandas_dataframe_agent(llm, df_errors, prefix='you will only have access to one tool, therefore, always write ', verbose=True)
+agent = create_pandas_dataframe_agent(llm, df_errors, verbose=True)
 #agent.prompt.template
 #new_prompt = 
 
 answer = agent.run("Which host wrote the last message according to the timestamps?")
+#answer = agent.run("give me the name of one random host")
 print("answer:", answer)
