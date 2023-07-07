@@ -8,6 +8,7 @@ from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.vectorstores import Chroma
 from langchain.embeddings.sentence_transformer import HuggingFaceEmbeddings
 
+from fuzzywuzzy import process, fuzz
 
 #options is a list of strings that are the keys of the json file
 def keep_only(json_log, options):
@@ -32,6 +33,9 @@ def create_preprocessed_folder(raw_logs_path):
     os.makedirs(preprocessed_logs_path, exist_ok=True)
     return preprocessed_logs_path
 
+def fuzzy_match_ratio(string1, string2):
+    return fuzz.ratio(string1, string2)
+
 def save_json_log_to_df(path_to_json_log):
     options = ["host", "message", "@timestamp"]
     #load the json file
@@ -49,6 +53,11 @@ def save_json_log_to_df(path_to_json_log):
         pass
     #save the json file in the preprocessed folder
     preprocessed_df_path = path_to_json_log.replace("raw", "preprocessed").replace(".json", ".csv")
+
+    #summarise similar log messages using levenshtein distance and fuzzywuzzy
+    grouped = preprocessed_df_path.groupby(preprocessed_df_path['Name'].apply(lambda x: process.extractOne(x, preprocessed_df_path['Name'], scorer=fuzzy_match_ratio, score_cutoff=80)[0]))
+
+
     df_keep_only.to_csv(preprocessed_df_path, index=False)
 
 def load_csv_as_langchain_docs(path_to_csvs):
@@ -80,10 +89,7 @@ if __name__ == '__main__':
     docs = load_csv_as_langchain_docs(preprocessed_logs_path)
     #docs = [doc for doc in docs if doc!=None]
 
-    #embedding_model = INSTRUCTOR(model_name="hkunlp/instructor-xl", device="cuda")
     #create the embedding function
-    #sembedding_function = InstructorEmbeddingFunction(model=embedding_model)
-    #embedding_function = InstructorEmbeddingFunction(model_name="hkunlp/instructor-xl", device="cuda")
     model_kwargs = {'device': 'cuda'}
     def_embedding_function = HuggingFaceEmbeddings(
                                                    model_name="all-MiniLM-L6-v2",
