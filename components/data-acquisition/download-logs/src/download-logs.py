@@ -2,7 +2,7 @@ import os
 import json
 import warnings
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from opensearchpy import OpenSearch
 import urllib3
 import argparse
@@ -65,7 +65,6 @@ def save_logs_from_today(log_type):
         }
         full_queries.append(query)
 
-
     for q_name, query in zip(q_names,full_queries):
         response = client.search(
                                 body = query,
@@ -75,6 +74,53 @@ def save_logs_from_today(log_type):
         log_out_path = os.path.join(outpath, q_name + '.json')
         with open(log_out_path,'w') as outfile:
             json.dump(response, outfile, indent=4)
+
+#if it's 00:02, get logs from 23:00 to 00:00 and so on  
+def download_logs_from_last_hour():
+    last_hour_datetime = (datetime.today() - timedelta(hours=1))
+    day_of_last_hour = last_hour_datetime.strftime('%Y.%m.%d')
+    hour_of_last_hour = last_hour_datetime.strftime('%H')
+    outpath ='/data/raw/logs/recent_hour'
+    if not os.path.exists(outpath):
+        os.makedirs(outpath)
+    index_name = 'logstash-syslog-' + day_of_last_hour
+    q_names = ['warning', 'crtical', 'error']
+    full_queries = []
+    for q in q_names:
+        query = {
+            'size': 10000,
+            'bool':{
+                'must':[
+                    {
+                        'multi_match': {
+                            'query': q,
+                            'fields': ['syslog_severity']
+                        }
+                    },
+                    {
+                        'range':{
+                            '@timestamp':{
+                                'gte': last_hour_datetime,
+                                'lte': last_hour_datetime + timedelta(hours=1)
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+        full_queries.append(query)
+    for q_name, query in zip(q_names,full_queries):
+        response = client.search(
+                                body = query,
+                                index = index_name
+        )
+        #json_file = json.dumps(response)
+        log_out_path = os.path.join(outpath, q_name + '.json')
+        with open(log_out_path,'w') as outfile:
+            json.dump(response, outfile, indent=4)
+
+
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -83,8 +129,12 @@ if __name__ == '__main__':
     parser.add_argument('-e','--end_time')
     #flag for logs from today
     parser.add_argument('-t','--today', action='store_true')
+    parser.add_argument('-l','--last_hour', action='store_true')
+
     args = parser.parse_args()
-    
+    if args.last_hour != None:
+        download_logs_from_last_hour()
+
     if args.today != None:
         save_logs_from_today(log_type='logstash-syslog-')
     else:
