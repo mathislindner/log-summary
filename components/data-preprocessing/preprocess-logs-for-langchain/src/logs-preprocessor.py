@@ -9,10 +9,11 @@ from langchain.document_loaders import DirectoryLoader
 from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.vectorstores import Chroma
 from langchain.embeddings.sentence_transformer import HuggingFaceEmbeddings
-from sentence_transformers import SentenceTransformer
 
-from jellyfish import levenshtein_distance
-from jellyfish import jaro_winkler
+
+from sentence_transformers import SentenceTransformer
+from sklearn.cluster import AgglomerativeClustering
+
 #options is a list of strings that are the keys of the json file
 def keep_only(json_log, options):
     hits = json_log["hits"]["hits"]
@@ -37,7 +38,7 @@ def create_preprocessed_folder(raw_logs_path):
     preprocessed_logs_path = raw_logs_path.replace("raw", "preprocessed")
     os.makedirs(preprocessed_logs_path, exist_ok=True)
     return preprocessed_logs_path
-
+"""
 #embeddings1 and embeddings2 are normalized numpy arrays
 def cosine_similarity_vectorized(array_of_embedings_1, array_of_embedings_2):
     #for each row in the array of embeddings calculate the cosine similarity between the two arrays
@@ -86,13 +87,27 @@ def get_compressed_df(df, threshold):
         if max(already_included) != len(group) - 1:
             print("not matching")
     return pd.concat(list_for_compress_df)
-
+"""
 def get_compressed_logs_2(df, threshold):
-    sentence_transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2', device='cuda')
+    df = df.sort_values(by=['@timestamp'], ascending=False)
+    sentence_transformer = SentenceTransformer('all-mpnet-base-v2', device='cuda')
     df['embeddings'] = df.apply(lambda x: sentence_transformer.encode(str(x['host']) + str(x['message'])), axis=1)
-    #calculate the similarity matrix
-    similarity_matrix = cosine_similarity_vectorized(df['embeddings'].values, df['embeddings'].values)
-    print(similarity_matrix)
+
+    clustering_model = AgglomerativeClustering(n_clusters=None, distance_threshold=threshold, affinity='cosine', linkage='average')
+    clustering_model.fit(df['embeddings'].tolist())
+    df['cluster'] = clustering_model.labels_
+    #add sum of cluster column
+    df['number_of_similar_messages'] = df.groupby('cluster')['cluster'].transform('count')
+    #add the host names that are in the cluster
+    unique_hosts = df.groupby('cluster')['host'].unique()
+    df['hosts_in_cluster'] = df['cluster'].apply(lambda x: unique_hosts[x])
+    df = df.drop_duplicates(subset=['cluster'], keep='last').reset_index()
+    df = df.drop(columns=['embeddings', 'cluster', 'index'])
+    df = df[['hosts_in_cluster', 'number_of_similar_messages', 'message', '@timestamp']]
+
+    return df
+
+
 
 def save_json_log_to_df(path_to_json_log):
     options = ["host", "message", "@timestamp"]
@@ -111,8 +126,8 @@ def save_json_log_to_df(path_to_json_log):
     except KeyError:
         df_keep_only.to_csv(preprocessed_df_path, index=False)
         return
-    compressed_df = get_compressed_df(df_keep_only, 0.95)
-    #compressed_df = get_compressed_logs_2(df_keep_only, 0.95)
+    #compressed_df = get_compressed_df(df_keep_only, 0.95)
+    compressed_df = get_compressed_logs_2(df_keep_only, 0.05)
     print('compression ratio: ', len(compressed_df)/len(df_keep_only))
     compressed_df.to_csv(preprocessed_df_path, index=False)
     #print size of the df
