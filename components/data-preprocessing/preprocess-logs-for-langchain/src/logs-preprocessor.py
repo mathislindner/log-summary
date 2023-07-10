@@ -3,13 +3,16 @@ import argparse
 import json
 import os
 import pandas as pd
+import numpy as np
+from tqdm import tqdm
 from langchain.document_loaders import DirectoryLoader
 from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.vectorstores import Chroma
 from langchain.embeddings.sentence_transformer import HuggingFaceEmbeddings
+from sentence_transformers import SentenceTransformer
 
-from fuzzywuzzy import process, fuzz
-
+from jellyfish import levenshtein_distance
+from jellyfish import jaro_winkler
 #options is a list of strings that are the keys of the json file
 def keep_only(json_log, options):
     hits = json_log["hits"]["hits"]
@@ -26,6 +29,8 @@ def keep_only(json_log, options):
         df["host"] = df["host"].apply(lambda x: x['hostname'])
     except:
         pass
+    #convert all the columns to string
+    df = df.astype(str)
     return df
 
 def create_preprocessed_folder(raw_logs_path):
@@ -33,8 +38,61 @@ def create_preprocessed_folder(raw_logs_path):
     os.makedirs(preprocessed_logs_path, exist_ok=True)
     return preprocessed_logs_path
 
-def fuzzy_match_ratio(string1, string2):
-    return fuzz.ratio(string1, string2)
+#embeddings1 and embeddings2 are normalized numpy arrays
+def cosine_similarity_vectorized(array_of_embedings_1, array_of_embedings_2):
+    #for each row in the array of embeddings calculate the cosine similarity between the two arrays
+    #the result is a matrix of cosine similarities
+    cosine_similarities = np.dot(array_of_embedings_1, array_of_embedings_2.T)
+    return cosine_similarities
+
+def get_compressed_df(df, threshold):
+    #if messages are exactly the same and by the same host then drop them and keep only the last one
+    #df = df.drop_duplicates(subset=['message', 'host'], keep='last').reset_index()
+    #find similar messages and group them using an embedding function and a cosine similarity
+    sentence_transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2', device='cuda')
+    df['embeddings'] = pd.Series(list(sentence_transformer.encode(df['message'].values)))
+    #entries for the compressed_df
+    list_for_compress_df = []
+    #for each host calculate the similarity between the messages
+    grouped = df.groupby('host')
+    for host, group in tqdm(grouped):
+        #sort group by timestamp reverse
+        group = group.sort_values(by=['@timestamp'], ascending=False)
+        #convert the list in the embeddings column to a numpy array
+        embeddings_of_group = np.array([np.array(embedding) for embedding in group['embeddings']])
+        #calculate the similarity matrix
+        similarity_matrix_in_group_by_message = cosine_similarity_vectorized(embeddings_of_group,embeddings_of_group)
+        #go through the group from last message to first message
+        #for each message, take all the messages that are similar to it and put them in compressed_df
+        already_included = []
+        for index_in_group, (df_index, row) in enumerate(group.iterrows()):
+            #if the message is already in the compressed_df then skip it
+            if index_in_group in already_included:
+                continue
+            already_included.append(index_in_group)
+            #get the similarity matrix row of the message
+            similarity_matrix_row = similarity_matrix_in_group_by_message[index_in_group]
+            #get the indexes of the messages that are similar to the message
+            similar_messages_indexes = np.where(similarity_matrix_row > threshold)[0]
+            #remove index from array if is in already_included
+            similar_messages_indexes = np.setdiff1d(similar_messages_indexes, already_included)
+            #add similar_messages_indexes in already_included
+            already_included.extend(similar_messages_indexes)
+            #create new entry for the compressed_df
+            compressed_log_entry = pd.DataFrame(columns=['host', 'message', '@timestamp','number_of_similar_messages'])
+            compressed_log_entry.loc[len(compressed_log_entry.index)] = [row['host'], row['message'], row['@timestamp'], len(similar_messages_indexes)]
+            #add the entry to the list
+            list_for_compress_df.append(compressed_log_entry)
+        if max(already_included) != len(group) - 1:
+            print("not matching")
+    return pd.concat(list_for_compress_df)
+
+def get_compressed_logs_2(df, threshold):
+    sentence_transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2', device='cuda')
+    df['embeddings'] = df.apply(lambda x: sentence_transformer.encode(str(x['host']) + str(x['message'])), axis=1)
+    #calculate the similarity matrix
+    similarity_matrix = cosine_similarity_vectorized(df['embeddings'].values, df['embeddings'].values)
+    print(similarity_matrix)
 
 def save_json_log_to_df(path_to_json_log):
     options = ["host", "message", "@timestamp"]
@@ -44,27 +102,26 @@ def save_json_log_to_df(path_to_json_log):
     #keep only the message, server and time
     df_keep_only = keep_only(json_log, options)
     #convert the timestamp to datetime if empty logs just ignore
+    preprocessed_df_path = path_to_json_log.replace("raw", "preprocessed").replace(".json", ".csv")
     try:
         #convert the timestamp to datetime
         df_keep_only["@timestamp"] = pd.to_datetime(df_keep_only["@timestamp"])
         #sort by timestamp
         df_keep_only = df_keep_only.sort_values(by=['@timestamp'])
     except KeyError:
-        pass
-    #save the json file in the preprocessed folder
-    preprocessed_df_path = path_to_json_log.replace("raw", "preprocessed").replace(".json", ".csv")
-
-    #summarise similar log messages using levenshtein distance and fuzzywuzzy
-    grouped = preprocessed_df_path.groupby(preprocessed_df_path['Name'].apply(lambda x: process.extractOne(x, preprocessed_df_path['Name'], scorer=fuzzy_match_ratio, score_cutoff=80)[0]))
-
-
-    df_keep_only.to_csv(preprocessed_df_path, index=False)
+        df_keep_only.to_csv(preprocessed_df_path, index=False)
+        return
+    compressed_df = get_compressed_df(df_keep_only, 0.95)
+    #compressed_df = get_compressed_logs_2(df_keep_only, 0.95)
+    print('compression ratio: ', len(compressed_df)/len(df_keep_only))
+    compressed_df.to_csv(preprocessed_df_path, index=False)
+    #print size of the df
+    print("size of the df: ", len(compressed_df))
 
 def load_csv_as_langchain_docs(path_to_csvs):
     loader = DirectoryLoader(path_to_csvs, glob='**/*.csv', loader_cls=CSVLoader)
     documents = loader.load()
     return documents
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -83,18 +140,14 @@ if __name__ == '__main__':
         save_json_log_to_df(json_log_path)
         #save the dataframe in the preprocessed folder
     
-    #TODO: for all the logs create embeddings for better retrieval
+
+    """
     #load csv as docs
     print(preprocessed_logs_path)
     docs = load_csv_as_langchain_docs(preprocessed_logs_path)
     #docs = [doc for doc in docs if doc!=None]
 
-    #create the embedding function
-    model_kwargs = {'device': 'cuda'}
-    def_embedding_function = HuggingFaceEmbeddings(
-                                                   model_name="all-MiniLM-L6-v2",
-                                                   model_kwargs=model_kwargs
-                                                   )
 
     db = Chroma.from_documents(docs, def_embedding_function, persist_directory="/data/preprocessed/chromadb")
     db.persist()
+    """
