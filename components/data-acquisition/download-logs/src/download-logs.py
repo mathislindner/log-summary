@@ -91,8 +91,8 @@ if __name__ == '__main__':
     parser.add_argument('-s','--start_time')
     #if we do not have the end time, use now as the end time
     parser.add_argument('-e','--end_time')
-    #flag for logs from today
-    parser.add_argument('-t','--today', action='store_true')
+    #flag for logs from day
+    parser.add_argument('-d','--day')
     parser.add_argument('-l','--last_hour', action='store_true')
     args = parser.parse_args()
 
@@ -111,10 +111,19 @@ if __name__ == '__main__':
         #saves the logs in UTC time no local time to avoid confusion between the reply and the request
         download_logs_in_time_frame(last_hour_datetime, current_time_utc, last_hour=True)
 
-    elif args.today == True:
-        current_time_utc = datetime.utcnow()
-        start_time = datetime(current_time_utc.year, current_time_utc.month, current_time_utc.day, 0, 0, 0)
-        download_logs_in_time_frame(start_time, current_time_utc)
+    elif args.day != None:
+        #verify that the day is in the correct format
+        try:
+            day = datetime.strptime(args.day, '%Y-%m-%d')
+        except ValueError:
+            print('Wrong day format! Use YYYY-MM-DD')
+            exit()
+        #download every hour of today hour by hour
+        start_time = datetime(day.year, day.month, day.day, 0, 0, 0)
+        time_inbetween = [start_time + timedelta(hours=i) for i in range(0, 25)]
+        for i in range(0, len(time_inbetween)-1):
+            download_logs_in_time_frame(time_inbetween[i], time_inbetween[i+1], last_hour=True)
+
     else:
         print('No arguements!')
 
