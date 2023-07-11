@@ -8,16 +8,27 @@ TEMP_VOL="/data:/data"
 #get the logs last hour 
     cd $log_summary_path/components/data-acquisition/download-logs
     docker build -t log-downloader .
-    docker run --network=host -v $TEMP_VOL --tz=Europe/Paris log-downloader
+    #docker run --network=host -v $TEMP_VOL --tz=Europe/Paris log-downloader
+    #debug
+    SRC_VOL=$log_summary_path"/components/data-acquisition/download-logs/src:/app/src"
+    docker run -it --network=host -v $TEMP_VOL --tz=Europe/Paris -v $SRC_VOL  log-downloader /bin/bash
 
 #compress logs and put them in preprocessed folder
     cd $log_summary_path/components/data-preprocessing/compress-logs-for-opensearch
-    $SRC_VOL=$log_summary_path"/components/data-preprocessing/compress-logs-for-opensearch/src:/app/src"
     docker build -t log-compressor .
+    #docker run --network=host -v $TEMP_VOL --tz=Europe/Paris log-compressor
+    #debug
+    TEMP_VOL="/data:/data"
+    SRC_VOL=$log_summary_path"/components/data-preprocessing/compress-logs-for-opensearch/src:/app/src"
     docker run -it --network=host -v $TEMP_VOL --tz=Europe/Paris -v $SRC_VOL  log-compressor /bin/bash
 
 
 #send logs to opensearch
-#    cd $log_summary_path/components/data-export/send-logs-to-opensearch
-#    docker build -t log-sender .
-#    docker run --network=host -v --tz=Europe/Paris $TEMP_VOL log-sender
+    cd $log_summary_path/components/data-export/send-logs-to-opensearch
+    docker build -t log-sender .
+    #docker run --network=host -v --tz=Europe/Paris $TEMP_VOL log-sender
+    #debug
+    TEMP_VOL="/data:/data"
+    cwd=$(pwd)
+    SRC_VOL=$cwd"/src:/app/src"
+    docker run -it --network=host -v $TEMP_VOL --tz=Europe/Paris -v $SRC_VOL  log-sender /bin/bash

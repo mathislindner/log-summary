@@ -1,1 +1,2 @@
 components/data-acquisition/download-logs/src/config.json
+components/data-export/send-logs-to-opensearch/src/config.json
