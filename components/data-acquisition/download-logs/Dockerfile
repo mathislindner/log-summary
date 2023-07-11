@@ -7,5 +7,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD python src/download-logs.py --today
+CMD python3 src/download-logs.py --last_hour
 #CMD ['python','src/download-logs.py','--today']

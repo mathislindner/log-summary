@@ -7,11 +7,13 @@ current_dir=$(pwd)
 #run data acquisition
 
     #get the logs
-        : '
+        
         cd /root/log-summary/components/data-acquisition/download-logs
         docker build -t log-downloader .
-        docker run --network=host -v $TEMP_VOL log-downloader
-        '
+        src_path=$(pwd)"/src"
+        SRC_VOL=$src_path":/app/src"
+        docker run -it --network=host -v $TEMP_VOL -v $SRC_VOL --tz=Europe/Paris log-downloader /bin/bash
+        
 
     #get the alarms
         cd $current_dir/components/data-acquisition/download-alarms
