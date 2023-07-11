@@ -14,7 +14,6 @@ current_dir=$(pwd)
         SRC_VOL=$src_path":/app/src"
         docker run -it --network=host -v $TEMP_VOL -v $SRC_VOL --tz=Europe/Paris log-downloader /bin/bash
         
-
     #get the alarms
         cd $current_dir/components/data-acquisition/download-alarms
         docker build -t alarm-downloader .
