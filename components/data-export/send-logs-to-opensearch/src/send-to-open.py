@@ -34,6 +34,26 @@ def get_index_name(log_path):
     index_name = base_name + date
     return index_name
 
+def create_index_in_opensearch(index_name):
+    client = get_client()
+    #create the index if it does not exist
+    #this could also be done using the df but can use this as validation of the df
+    if not client.indices.exists(index_name):
+        index_mappings = {
+            'mappings': {
+                'properties': {
+                    'host': {'type': 'text'},
+                    'message': {'type': 'text'},
+                    'n_unique_hosts': {'type': 'integer'},
+                    'n_similar_messages': {'type': 'integer'},
+                    'syslog_severity': {'type': 'text'},
+                    '@timestamp': {'type': 'timestamp'}
+                }
+            }
+        }
+        client.indices.create(index_name, body=index_mappings)
+    return True
+
 def send_log_to_opensearch(log_path):
     client = get_client()
     log_df = pd.read_csv(log_path, sep='\t')
@@ -41,11 +61,7 @@ def send_log_to_opensearch(log_path):
     print("sending log:{} to index:{}".format(log_path, index_name))
     
     #create the index if it does not exist
-    if not client.indices.exists(index_name):
-        client.indices.create(index_name)
-    #send the log to opensearch
-    if log_df.empty:
-        return True
+    create_index_in_opensearch(index_name)
     try:
         body = log_df.to_dict(orient='records')
         client.bulk(body, index=index_name)

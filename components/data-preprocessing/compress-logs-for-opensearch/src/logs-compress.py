@@ -51,8 +51,9 @@ def get_compressed_logs_df(df, threshold):
     df['n_unique_hosts'] = df['cluster'].apply(lambda x: len(unique_hosts[x]))
     #only keep the last message of each cluster
     df = df.drop_duplicates(subset=['cluster'], keep='last').reset_index()
+    #TODO: add syslog severity
     #reorder the columns and drop not needed columns
-    df = df[['host','n_unique_hosts', 'number_of_similar_messages', 'message', '@timestamp']]
+    df = df[['host', 'message','n_unique_hosts', 'n_similar_messages', '@timestamp']]
 
     return df
 
