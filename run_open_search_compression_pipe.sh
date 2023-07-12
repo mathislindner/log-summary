@@ -8,9 +8,11 @@ TEMP_VOL="/data:/data"
 #get the logs last hour 
     cd $log_summary_path/components/data-acquisition/download-logs
     docker build -t log-downloader .
+    TEMP_VOL="/data:/data"
+    cwd=$(pwd)
+    SRC_VOL=$cwd"/src:/app/src"
     #docker run --network=host -v $TEMP_VOL --tz=Europe/Paris log-downloader
     #debug
-    SRC_VOL=$log_summary_path"/components/data-acquisition/download-logs/src:/app/src"
     docker run -it --network=host -v $TEMP_VOL --tz=Europe/Paris -v $SRC_VOL  log-downloader /bin/bash
 
 #compress logs and put them in preprocessed folder
@@ -19,7 +21,8 @@ TEMP_VOL="/data:/data"
     #docker run --network=host -v $TEMP_VOL --tz=Europe/Paris log-compressor
     #debug
     TEMP_VOL="/data:/data"
-    SRC_VOL=$log_summary_path"/components/data-preprocessing/compress-logs-for-opensearch/src:/app/src"
+    cwd=$(pwd)
+    SRC_VOL=$cwd"/src:/app/src"
     docker run -it --network=host -v $TEMP_VOL --tz=Europe/Paris -v $SRC_VOL  log-compressor /bin/bash
 
 
