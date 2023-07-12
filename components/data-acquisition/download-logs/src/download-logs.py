@@ -6,7 +6,9 @@ from opensearchpy import OpenSearch
 import urllib3
 import argparse
 
+#disable all the warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+#set the proxy
 os.environ['https_proxy']='http://lbproxy.cern.ch:8080' 
 os.environ['http_proxy']='http://lbproxy.cern.ch:8080' 
 os.environ['no_proxy']="localhost,127.0.0.1,*.cern.ch,*.local,10.0.0.0/8,opensearch.lbdaq.cern.ch"

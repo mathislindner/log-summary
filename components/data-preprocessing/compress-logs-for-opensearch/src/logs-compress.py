@@ -45,7 +45,7 @@ def get_compressed_logs_df(df, threshold):
     #add cluster column
     df['cluster'] = clustering_model.labels_
     #add sum of cluster column
-    df['number_of_similar_messages'] = df.groupby('cluster')['cluster'].transform('count')
+    df['n_similar_messages'] = df.groupby('cluster')['cluster'].transform('count')
     #add the number of unique hosts in the cluster
     unique_hosts = df.groupby('cluster')['host'].unique()
     df['n_unique_hosts'] = df['cluster'].apply(lambda x: len(unique_hosts[x]))

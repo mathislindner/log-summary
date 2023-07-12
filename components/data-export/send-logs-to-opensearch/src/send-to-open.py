@@ -3,11 +3,14 @@ from glob import glob
 import json
 from datetime import datetime, timedelta, timezone
 import time
+import re
 from tqdm import tqdm
+import warnings
 import pandas as pd
 from opensearchpy import OpenSearch
 import urllib3
 import argparse
+urllib3.disable_warnings()
 
 def load_config():
     f = open('src/config.json')
@@ -15,20 +18,22 @@ def load_config():
     return config
 
 def get_client():
-    config = load_config()
-    # Create the client instance
-    client = OpenSearch(
-        hosts = [{'host': config['HOST'], 'port':config['PORT']}],
-        http_auth = (config['USERNAME'],config['PASSWORD']),
-        use_ssl = True,
-        ca_certs=False,
-        verify_certs=False        
-    )
-    # Successful response!
-    client.info()
-    return client
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        config = load_config()
+        # Create the client instance
+        client = OpenSearch(
+            hosts = [{'host': config['HOST'], 'port':config['PORT']}],
+            http_auth = (config['USERNAME'],config['PASSWORD']),
+            use_ssl = True,
+            ca_certs=False,
+            verify_certs=False        
+        )
+        # Successful response!
+        client.info()
+        return client
 def get_index_name(log_path):
-    base_name = "compressed-logstash-syslog-"
+    base_name = "logstash-compressed-syslogs-"
     #get the date from the log path
     date = log_path.split('/')[-3]
     index_name = base_name + date
@@ -36,6 +41,7 @@ def get_index_name(log_path):
 
 def create_index_in_opensearch(index_name):
     client = get_client()
+
     #create the index if it does not exist
     #this could also be done using the df but can use this as validation of the df
     if not client.indices.exists(index_name):
@@ -47,24 +53,57 @@ def create_index_in_opensearch(index_name):
                     'n_unique_hosts': {'type': 'integer'},
                     'n_similar_messages': {'type': 'integer'},
                     'syslog_severity': {'type': 'text'},
-                    '@timestamp': {'type': 'timestamp'}
+                    '@timestamp': {'type': 'date', 'format': 'yyyy-MM-dd HH:mm:ss.SSSSSS'},
                 }
             }
         }
         client.indices.create(index_name, body=index_mappings)
+    else:
+        print("index {} already exists".format(index_name))
     return True
+
+def escape_ansi(line):
+    line = str(line)
+    ansi_escape =re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
+    return ansi_escape.sub('', line)
+
+#using requests
+def form_opensearch_index_json(actions):
+    data = ""
+    for action in actions:
+        data += str(json.dumps(action) + "\n")
+    return data
 
 def send_log_to_opensearch(log_path):
     client = get_client()
-    log_df = pd.read_csv(log_path, sep='\t')
+    log_df = pd.read_csv(log_path)
     index_name = get_index_name(log_path)
-    print("sending log:{} to index:{}".format(log_path, index_name))
-    
+    #clean the message column
+    #remove ANSI escape sequences
+    log_df['message'] = log_df['message'].apply(lambda x: escape_ansi(x))
+    #remove the new line characters
+    log_df.replace(to_replace=[r"\\t|\\n|\\r", "\t|\n|\r"], value=["",""], regex=True, inplace=True)
+    #remove timezone from timestamp
+    log_df['@timestamp'] = log_df['@timestamp'].apply(lambda x: x.split('+')[0])
     #create the index if it does not exist
     create_index_in_opensearch(index_name)
+    #send the log to opensearch
     try:
-        body = log_df.to_dict(orient='records')
-        client.bulk(body, index=index_name)
+        data = log_df.to_dict(orient='records')
+        bulk_data = []
+        for doc in data:
+            bulk_data.append(
+                {'index': {'_index': index_name}})
+            bulk_data.append(
+                {'host': doc['host'],
+                'message': doc['message'],
+                'n_unique_hosts': doc['n_unique_hosts'],
+                'n_similar_messages': doc['n_similar_messages'],
+                '@timestamp': doc['@timestamp']}
+                )
+        
+        #send data to client
+        response = client.bulk(bulk_data, index=index_name)
         return True
     except Exception as e:
         print("Error sending log: {} to opensearch".format(log_path))
@@ -107,7 +146,7 @@ if __name__ == '__main__':
     for log in tqdm(logs_to_send):
         success = False
         tries = 0
-        while not success or tries < 3:
+        while not success or tries < 2:
             success = send_log_to_opensearch(log)
             tries += 1
             if success:
