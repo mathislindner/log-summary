@@ -36,20 +36,23 @@ def create_preprocessed_folder(raw_logs_path):
 
 def get_compressed_logs_df(df, threshold):
     df = df.sort_values(by=['@timestamp'], ascending=False)
+    #create embeddings for each message to cluster them on their hostname and message
     sentence_transformer = SentenceTransformer('all-mpnet-base-v2', device='cuda')
     df['embeddings'] = df.apply(lambda x: sentence_transformer.encode(str(x['host']) + str(x['message'])), axis=1)
-
+    #cluster the embeddings
     clustering_model = AgglomerativeClustering(n_clusters=None, distance_threshold=threshold, metric='cosine', linkage='average')
     clustering_model.fit(df['embeddings'].tolist())
+    #add cluster column
     df['cluster'] = clustering_model.labels_
     #add sum of cluster column
     df['number_of_similar_messages'] = df.groupby('cluster')['cluster'].transform('count')
-    #add the host names that are in the cluster
+    #add the number of unique hosts in the cluster
     unique_hosts = df.groupby('cluster')['host'].unique()
-    df['hosts_in_cluster'] = df['cluster'].apply(lambda x: unique_hosts[x])
+    df['n_unique_hosts'] = df['cluster'].apply(lambda x: len(unique_hosts[x]))
+    #only keep the last message of each cluster
     df = df.drop_duplicates(subset=['cluster'], keep='last').reset_index()
-    df = df.drop(columns=['embeddings', 'cluster', 'index'])
-    df = df[['hosts_in_cluster', 'number_of_similar_messages', 'message', '@timestamp']]
+    #reorder the columns and drop not needed columns
+    df = df[['host','n_unique_hosts', 'number_of_similar_messages', 'message', '@timestamp']]
 
     return df
 
