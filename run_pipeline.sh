@@ -45,7 +45,7 @@ current_dir=$(pwd)
 
     #run flask server
         cd $current_dir/components/model-inference/flask-inference
-        docker build -t logs-chatbot .
+        docker build -t flask-inference .
         src_path=$(pwd)"/src"
         SRC_VOL=$src_path":/app/src"
         #docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all flask-inference /bin/bash
@@ -65,9 +65,10 @@ current_dir=$(pwd)
         SRC_VOL=$src_path":/app/src"
         docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all local-pandas /bin/bash
 
-    #run LLAMA cpp
-        cd $current_dir/components/model-inference/local-pandas-agent-pipe
-        docker build -t llama-cpp .
+    #run export
+        cd $current_dir/components/data-export/create-daily-report
+        docker build -t daily-report .
+        TEMP_VOL="/data:/data"
         src_path=$(pwd)"/src"
         SRC_VOL=$src_path":/app/src"
-        docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL --device  nvidia.com/gpu=all llama-cpp /bin/bash
+        docker run  -it --network=host -v $TEMP_VOL -v $SRC_VOL daily-report /bin/bash
