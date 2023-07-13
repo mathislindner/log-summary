@@ -1,7 +1,6 @@
 import os
 import json
-from datetime import datetime, timedelta, timezone
-import time
+from datetime import datetime, timedelta
 from opensearchpy import OpenSearch
 import urllib3
 import argparse
@@ -15,13 +14,23 @@ os.environ['no_proxy']="localhost,127.0.0.1,*.cern.ch,*.local,10.0.0.0/8,opensea
 
 #TODO: change to only ignore specifically the error: Connecting to https://opensearch.lbdaq.cern.ch:9200 using SSL with verify_certs=False is insecure.
 #warnings.simplefilter('ignore')
+#if 
 def load_config():
     f = open('src/config.json')
     config = json.load(f)
     return config
 
+def load_env_variables():
+    config = dict()
+    config['HOST'] = os.environ['HOST']
+    config['PORT'] = os.environ['PORT']
+    config['USERNAME'] = os.environ['USERNAME']
+    config['PASSWORD'] = os.environ['PASSWORD']
+    return config
+
 def get_client():
-    config = load_config()
+    #config = load_config()
+    config = load_env_variables()
     # Create the client instance
     client = OpenSearch(
         hosts = [{'host': config['HOST'], 'port':config['PORT']}],
@@ -81,6 +90,7 @@ def download_logs_in_time_frame(start_time, end_time, last_hour=False):
                                 body = query,
                                 index = index_name
         )
+        print('Downloaded {} logs'.format(len(response['hits']['hits'])))
         #json_file = json.dumps(response)
         log_out_path = os.path.join(outpath, q_name + '.json')
         with open(log_out_path,'w') as outfile:
@@ -95,10 +105,20 @@ if __name__ == '__main__':
     parser.add_argument('-e','--end_time')
     #flag for logs from day
     parser.add_argument('-d','--day')
+    parser.add_argument('--hour', help='hour of the day to download, needs to be used with the day flag')
     parser.add_argument('-l','--last_hour', action='store_true')
+    
     args = parser.parse_args()
 
-    if args.start_time != None:
+    #reccuring job will us this every hour
+    if args.day != None and args.hour != None:
+        day = datetime.strptime(args.day, '%Y-%m-%d')
+        hour = int(args.hour) #1 hour before
+        start_time = datetime(day.year, day.month, day.day, hour, 0, 0)
+        end_time = datetime(day.year, day.month, day.day, hour+1, 0, 0)
+        download_logs_in_time_frame(start_time, end_time, True)
+
+    elif args.start_time != None:
         start_time = datetime.strptime(args.start_time, '%Y-%m-%dT%H:%M:%S')
         if args.end_time != None:
             end_time = datetime.strptime(args.end_time, '%Y-%m-%dT%H:%M:%S')
@@ -107,7 +127,7 @@ if __name__ == '__main__':
             end_time = datetime.utcnow()
             download_logs_in_time_frame(start_time, end_time)
 
-    if args.last_hour == True:
+    elif args.last_hour == True:
         current_time_utc = datetime.utcnow()
         last_hour_datetime = (current_time_utc - timedelta(hours=1))
         #saves the logs in UTC time no local time to avoid confusion between the reply and the request

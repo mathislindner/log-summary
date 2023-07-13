@@ -17,10 +17,19 @@ def load_config():
     config = json.load(f)
     return config
 
+def load_env_variables():
+    config = dict()
+    config['HOST'] = os.environ['HOST']
+    config['PORT'] = os.environ['PORT']
+    config['USERNAME'] = os.environ['USERNAME']
+    config['PASSWORD'] = os.environ['PASSWORD']
+    return config
+
 def get_client():
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
-        config = load_config()
+        #config = load_config()
+        config = load_env_variables()
         # Create the client instance
         client = OpenSearch(
             hosts = [{'host': config['HOST'], 'port':config['PORT']}],
@@ -32,8 +41,9 @@ def get_client():
         # Successful response!
         client.info()
         return client
+    
 def get_index_name(log_path):
-    base_name = "logstash-compressed-syslogs-"
+    base_name = "compressed-logstash-syslog-"
     #get the date from the log path
     date = log_path.split('/')[-3]
     index_name = base_name + date
@@ -41,7 +51,6 @@ def get_index_name(log_path):
 
 def create_index_in_opensearch(index_name):
     client = get_client()
-
     #create the index if it does not exist
     #this could also be done using the df but can use this as validation of the df
     if not client.indices.exists(index_name):
@@ -59,7 +68,8 @@ def create_index_in_opensearch(index_name):
         }
         client.indices.create(index_name, body=index_mappings)
     else:
-        print("index {} already exists".format(index_name))
+        pass
+        #print("index {} already exists".format(index_name))
     return True
 
 def escape_ansi(line):
@@ -99,7 +109,8 @@ def send_log_to_opensearch(log_path):
                 'message': doc['message'],
                 'n_unique_hosts': doc['n_unique_hosts'],
                 'n_similar_messages': doc['n_similar_messages'],
-                '@timestamp': doc['@timestamp']}
+                '@timestamp': doc['@timestamp'],
+                'syslog_severity': doc['syslog_severity']}
                 )
         
         #send data to client
@@ -120,6 +131,7 @@ def is_empty_df(fpath):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-p','--preprocessed_logs', help="path to the preprocessed logs folder", required=True)
+    parser.add_argument('--ignore_sent_logs', help="ignore the logs that were already sent", action='store_true')
     args = parser.parse_args()
 
     #create file to save the logs that were sent in the /data/sent-opensearch-logs.txt
@@ -129,10 +141,14 @@ if __name__ == '__main__':
             f.write("")
     #get the list of preprocessed logs and from subfolders
     preprocessed_logs = glob(os.path.join(args.preprocessed_logs, '**', '*.csv'), recursive=True)
-    #get the list of logs that were already sent
-    with open(sent_logs_path, 'r') as f:
-        sent_logs = f.readlines()
-    sent_logs = [log.replace("\n", "") for log in sent_logs]
+    if not args.ignore_sent_logs:
+        #get the list of logs that were already sent
+        with open(sent_logs_path, 'r') as f:
+            sent_logs = f.readlines()
+        sent_logs = [log.replace("\n", "") for log in sent_logs]
+    else:
+        sent_logs = []
+        print("change the ignore_sent_logs flag to False if you want to ignore the logs that were already sent")
     #add to sent logs if the log file is empty
     for log in preprocessed_logs:
         if is_empty_df(log) and log not in sent_logs:
@@ -141,8 +157,8 @@ if __name__ == '__main__':
                 f.write(log+"\n")
     #get the list of logs that were not sent
     logs_to_send = [log for log in preprocessed_logs if log not in sent_logs]
-    print("sending {} logs to opensearch".format(len(logs_to_send)))
 
+    print("sending {} logs to opensearch".format(len(logs_to_send)))
     for log in tqdm(logs_to_send):
         success = False
         tries = 0
