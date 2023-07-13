@@ -1,4 +1,5 @@
 #!/bin/bash
+#bash run_hourly_reindexing.sh /home/malindne/log-summary /data false #to run the script
 #get variables
     #first variable is the path to the log summary folder where the components are (full path)
     log_summary_path=$1

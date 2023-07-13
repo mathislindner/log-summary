@@ -1,0 +1,24 @@
+version: '3'
+#this is ony for the daily report creation, to run the hourly reindexing, use run_hourly_reindexing.sh
+#this docker compose should only be run appropiately 15 minutes
+services:
+  LLM-server:
+    build:
+      context: .
+      dockerfile: /components/daily-reports/model-inference/flask-inference/Dockerfile
+    ports:
+      - "80:80"
+  log-compressor:
+    build:
+      context: .
+      dockerfile: /components/hourly-reindexing/compress-logs-for-opensearch/Dockerfile
+
+  daily-reporter:
+    build:
+      context: .
+      dockerfile: /components/daily-reports/data-export/create-daily-report/Dockerfile
+      ports:
+        - "80:80"
+      depends_on:
+        - LLM-server
+        - log-compressor

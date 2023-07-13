@@ -107,6 +107,7 @@ if __name__ == '__main__':
         print(args.log_path)
         list_of_json_logs_raw = glob(args.log_path + '/**/*.json', recursive=True)
         for log in list_of_json_logs_raw:
+            #create the preprocessed folder
             preprocessed_folder = log.replace("raw", "preprocessed").replace(log.split("/")[-1], "")
             os.makedirs(preprocessed_folder, exist_ok=True)
         #for each log
@@ -129,7 +130,7 @@ if __name__ == '__main__':
                 #compress the logs with a threshold of higher threshold 
                 compressed_df = get_compressed_logs_df(df_logs, 0.5)
                 #save the compressed logs
-                compressed_df.to_csv(os.path.join(preprocessed_day_logs_path, "compressed_{}.csv".format(log_level)), index=False)
+                compressed_df.to_csv(os.path.join(preprocessed_day_logs_path, "compressed_daily_{}.csv".format(log_level)), index=False)
         else:
             print("No logs for that day")
 

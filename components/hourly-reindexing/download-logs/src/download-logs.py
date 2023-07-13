@@ -106,7 +106,6 @@ if __name__ == '__main__':
     #flag for logs from day
     parser.add_argument('-d','--day')
     parser.add_argument('--hour', help='hour of the day to download, needs to be used with the day flag')
-    parser.add_argument('-l','--last_hour', action='store_true')
     
     args = parser.parse_args()
 
@@ -127,12 +126,6 @@ if __name__ == '__main__':
             end_time = datetime.utcnow()
             download_logs_in_time_frame(start_time, end_time)
 
-    elif args.last_hour == True:
-        current_time_utc = datetime.utcnow()
-        last_hour_datetime = (current_time_utc - timedelta(hours=1))
-        #saves the logs in UTC time no local time to avoid confusion between the reply and the request
-        download_logs_in_time_frame(last_hour_datetime, current_time_utc, last_hour=True)
-
     elif args.day != None:
         #verify that the day is in the correct format
         try:
@@ -147,5 +140,5 @@ if __name__ == '__main__':
             download_logs_in_time_frame(time_inbetween[i], time_inbetween[i+1], last_hour=True)
 
     else:
-        print('No arguements!')
+        print('No arguments!')
 

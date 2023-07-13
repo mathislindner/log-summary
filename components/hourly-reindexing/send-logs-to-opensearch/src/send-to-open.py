@@ -155,6 +155,12 @@ if __name__ == '__main__':
             sent_logs.append(log)
             with open(sent_logs_path, 'a') as f:
                 f.write(log+"\n")
+        #if it is a daily log, do not send it
+        if "daily" in log:
+            sent_logs.append(log)
+            with open(sent_logs_path, 'a') as f:
+                f.write(log+"\n")
+
     #get the list of logs that were not sent
     logs_to_send = [log for log in preprocessed_logs if log not in sent_logs]
 
