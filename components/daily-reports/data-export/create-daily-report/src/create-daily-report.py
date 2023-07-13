@@ -20,13 +20,12 @@ def reformat_logs(logs_paths):
     return 0
     
 def get_prompt(df):
+    #convert timestamp to datetime
+    df['@timestamp'] = pd.to_datetime(df['@timestamp'])
     #only keep hour and minute information to minimize the size of the table for the prompt format was yyyy-mm-dd hh:mm:ss.SSSSSS+00:00
-    #TODO: change hardcoded value
-    df['@timestamp'] = df['@timestamp'].apply(lambda x: x[11:16])
-    table_to_add = df[:30]
+    df['@timestamp'] = df['@timestamp'].dt.strftime('%H:%M')
+    #to minimize tokens
     table_to_add = table_to_add.to_json(index=False, orient='split')
-    #FIXME:temporary fix forsmaller table
-    
     #creates a prompt to create a daily report of the logs as if an system log admin wrote it
     prompt_template = """
     #INSTRUCTIONS:
@@ -44,6 +43,25 @@ def ask_llm(prompt):
     url = "http://127.0.0.1:80/query"
     headers = {'Content-Type': 'application/json'}
     data = json.dumps({"userQuery": prompt})
+    response = requests.post(url, headers=headers, data=data)
+    return response
+
+def post_to_lhcblog(date, text):
+    #post the response to the lhcblog
+    #read from env variables
+    url = os.environ['logbook_url']
+    logbook_pwd = os.environ['logbook_pwd']
+    headers = {'Content-Type': 'multipart/form-data'}
+    data = {
+        'CMD': 'Submit',
+        'UNM': 'aris-api',
+        'UPWD': logbook_pwd,
+        'EXP': 'TestLogbook',
+        'ENCODING': 'plain',
+        'SUBJECT': 'Daily report of the System Logs for {}'.format(date),
+        'SYSTEM': 'test',
+        'TEXT': text
+    }
     response = requests.post(url, headers=headers, data=data)
     return response
 
@@ -69,6 +87,7 @@ if __name__=="__main__":
     print(prompt_to_send)
     response = ask_llm(prompt_to_send)
     reply = response.json()
+    post_to_lhcblog(report_day, reply)
     print(reply)
 
 
