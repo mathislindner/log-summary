@@ -85,9 +85,9 @@ if __name__=="__main__":
 
     prompt_to_send = get_prompt(compressed_log)
     print(prompt_to_send)
-    response = ask_llm(prompt_to_send)
-    reply = response.json()
-    post_to_lhcblog(report_day, reply)
+    llm_response = ask_llm(prompt_to_send)
+    reply = llm_response.json()
+    lhcb_logs_reponse = post_to_lhcblog(report_day, reply)
     print(reply)
 
 

@@ -22,12 +22,14 @@
 #set specific variables to the hour
     #second is the day and hour to reindex in the format YYYY-MM-DD one hour before
     day=$(TZ=UTC+0 date -d '-1 hour' +'%Y-%m-%d')
+    #use 1 day before
+    day=$(TZ=UTC+0 date -d '-1 day' +'%Y-%m-%d')
     #third is the hour to reindex in the format HH
     hour=$(TZ=UTC+0 date -d '-1 hour' +'%H')
     #raw logs folder for the hour
-    raw_logs_folder_hour=$raw_logs_folder$day"/"$hour"/"
+    raw_logs_folder_hour=$raw_logs_folder$day"/" #$hour"/"
     #preprocessed folder for the hour
-    preprocessed_logs_folder_hour=$preprocessed_logs_folder$day"/"$hour"/"
+    preprocessed_logs_folder_hour=$preprocessed_logs_folder$day"/" #$hour"/"
 
 #check if the docker images should be rebuild
     if [ "$rebuild" = true ] ; then
@@ -50,7 +52,7 @@
 
 #run pipeline
     #get the logs last hour 
-    docker run --network=host -v $TEMP_VOL --tz=Europe/Paris --env-file $env_file log-downloader python3 /app/src/download-logs.py --day $day --hour $hour
+    docker run --network=host -v $TEMP_VOL --tz=Europe/Paris --env-file $env_file log-downloader python3 /app/src/download-logs.py --day $day #--hour $hour
     #compress logs and put them in preprocessed folder
     docker run -it --network=host -v $TEMP_VOL --tz=Europe/Paris --device nvidia.com/gpu=all log-compressor python3 /app/src/logs-compress.py --log_path $raw_logs_folder_hour
     #send logs to opensearch

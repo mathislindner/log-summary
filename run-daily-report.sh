@@ -43,7 +43,7 @@
 
 #run pipeline
     #compress logs and put them in preprocessed folder
-    docker run -it --network=host -v $TEMP_VOL --tz=Europe/Paris --device nvidia.com/gpu=all log-compressor python3 /app/src/logs-compress.py --log_path $preprocessed_logs_folder_day --day $day
+    docker run ---network=host -v $TEMP_VOL --tz=Europe/Paris --device nvidia.com/gpu=all log-compressor python3 /app/src/logs-compress.py --day $day
     # (make sure that you have flask-inference running to use the model (or set up another API))
     #create daily report 
     docker run -it --network=host -v $TEMP_VOL --tz=Europe/Paris --env-file $env_file log-summary python3 /app/src/create-daily-report.py --preprocessed_logs $preprocessed_logs_folder_day --day $day

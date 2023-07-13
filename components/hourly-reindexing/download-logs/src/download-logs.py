@@ -44,6 +44,7 @@ def get_client():
     return client
 
 #FIXME: does not take care of different log indices on different days
+#FIXME: does not take care of the 10k limit (use scroll)
 def download_logs_in_time_frame(start_time, end_time, last_hour=False):
     #add time zone
     day_of_last_hour = start_time.strftime('%Y.%m.%d')

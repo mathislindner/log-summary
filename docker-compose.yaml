@@ -8,17 +8,33 @@ services:
       dockerfile: /components/daily-reports/model-inference/flask-inference/Dockerfile
     ports:
       - "80:80"
+    volumes:
+      - /data:/data
+    env_file:
+      - .env
+    command: python3 app.py
+
   log-compressor:
     build:
       context: .
       dockerfile: /components/hourly-reindexing/compress-logs-for-opensearch/Dockerfile
+    volumes:
+      - /data:/data
+    env_file:
+      - .env
+    #TODO: change the day to the day before
+    command: python3 /app/src/logs-compress.py --day $day
 
   daily-reporter:
     build:
       context: .
       dockerfile: /components/daily-reports/data-export/create-daily-report/Dockerfile
-      ports:
+    ports:
         - "80:80"
-      depends_on:
-        - LLM-server
-        - log-compressor
+    volumes:
+      - /data:/data
+    env_file:
+      - .env
+    depends_on:
+      - LLM-server
+      - log-compressor
