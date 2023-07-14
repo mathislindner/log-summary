@@ -8,7 +8,7 @@ The other resummarises the logs by day and then creates a daily report using an 
 ### Hourly Reindexing
 This is the compression we got for approximately 10 hours of logs:
 Dashboard before:
-![Hourly reindexing before](/docs/images/syslogserrorwarningafter.PNG)
+![Hourly reindexing before](/docs/images/syslogserrorwarningbefore.PNG)
 Dashboard after:
 ![Hourly reindexing after](/docs/images/syslogserrorwarningafter.PNG)
 ### Daily Reports
