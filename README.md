@@ -1,4 +1,4 @@
-# Summarise System Logs from CERN LHCB's using Transformers
+# Summarise CERN LHCB's System Logs using Transformers
 # Description
 This repository contains two projects:
 One part is about taking the system logs of the CERN LHCB, summarising it by hour using a sentence transformer and clustering the results.
