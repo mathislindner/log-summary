@@ -3,33 +3,37 @@
 This repository contains two projects:
 One part is about taking the system logs of the CERN LHCB, summarising it by hour using a sentence transformer and clustering the results.
 The other resummarises the logs by day and then creates a daily report using an LLM.
+
 ## Results
 ### Hourly Reindexing
-For every hour where we get approximately n error logs, We manage to reduce this number by a factor of ~100
-#include image of a dashboards before and after
-
+This is the compression we got for approximately 10 hours of logs:
+Dashboard before:
+![Hourly reindexing before](/docs/images/syslogserrorwarningafter.PNG)
+Dashboard after:
+![Hourly reindexing after](/docs/images/syslogserrorwarningafter.PNG)
 ### Daily Reports
 Unfortunately the LLM's Falcon40B and LLama65b were not as good as we hoped. But the proof of concept stands, after taking the daily clustered logs (approximately 100-200 entries) and running them with GPT-4 we get the following results:
-#include table and then the report of the day.
 As soon as a better LLM on Huggingface is available, we can easily switch it out and get better results.
 
-## Pipeline description
+#include table and then the report of the day from GPT-4
+
+## Image of the pipeline
 #include image of the pipeline
 ![Daily summary pipeline](/docs/images/daily_log_summary.png)
-## Hourly Reindexing
+
+## Run the jobs
+### Run hourly Reindexing
 To run the hourly reindexing, simply run a cron job with the following command:
 ```
 bash run_hourly_reindexing.sh this/is/your/path/log-summary /wherever/you/want/the/cache/to/be false
 ```
 You will have to build the docker containers on the first run by changing the last argument to true.
 
-## Daily Reports
+### Run Daily Reports
 This part has to be run in parallel to the hourly reindexing. To run the daily reports: It uses the hourly reindexing cache to create a daily report. To run the daily reports, simply run compose up.
-
 ```
 docker-compose up
 ```
-
 
 ## Side notes
 ### Langchain Agent
