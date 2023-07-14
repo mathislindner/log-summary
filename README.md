@@ -41,11 +41,13 @@ docker-compose up
 ![Langchain Agent Pipeline](/docs/images/pipeline_for_llm.png)
 At some point an idea came up to create a bot that answers questions about the logs, unfortunately we could not find a model that does the job well enough of answering the questions right away. So we tried using agents, where the our best conversation was as follows:
 
-#### Example Conversation
+### Example Conversation
 Question: What is the last log entry?
 
 Thought: I should use the `sort_values` function to sort the dataframe by timestamp.
+
 Action: python_repl_ast
+
 Action Input: df.sort_values(by='@timestamp')
 ```	
 Observation:             
@@ -63,9 +65,12 @@ host                                            message                        @
 9999    n2232702  libceph: auth protocol 'cephx' mauth authentic...  2023-06-28 12:14:32.605000+00:00
 [10000 rows x 3 columns]
 ```
-Thought: I should use the `iloc` function to get the last row.
+Thought: I should use the `iloc` function to get the last row
+
 Action: python_repl_ast
+
 Action Input: df.sort_values(by='@timestamp').iloc[-1]
+
 Observation: 
 ```
 host                                                   n2232702
@@ -74,4 +79,5 @@ message       libceph: auth protocol 'cephx' mauth authentic...
 Name: 9999, dtype: object
 ```
 Thought: I now know the final answer
+
 Final Answer: n2232702
