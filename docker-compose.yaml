@@ -2,6 +2,7 @@ version: '3'
 #this is ony for the daily report creation, to run the hourly reindexing, use run_hourly_reindexing.sh
 #this docker compose should only be run appropiately 15 minutes
 services:
+
   LLM-server:
     build:
       context: .
@@ -12,7 +13,6 @@ services:
       - /data:/data
     env_file:
       - .env
-    command: python3 app.py
 
   log-compressor:
     build:
@@ -22,8 +22,7 @@ services:
       - /data:/data
     env_file:
       - .env
-    #TODO: change the day to the day before
-    command: python3 /app/src/logs-compress.py --day $day
+    command: python3 /app/src/logs-compress.py --day $(date -d "yesterday" +"%d")
 
   daily-reporter:
     build:

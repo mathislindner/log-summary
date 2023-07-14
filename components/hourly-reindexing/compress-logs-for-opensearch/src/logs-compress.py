@@ -121,14 +121,17 @@ if __name__ == '__main__':
         preprocessed_day_logs_path = os.path.join("/data/preprocessed/logs/", args.day)
         #if there are logs for each our of the day
         if os.path.isdir(preprocessed_day_logs_path):
-            log_levels=["warning", "error", "critical"]
+            log_levels=["warning", "error"]
             for log_level in log_levels:
                 #get all the logs of the day
                 list_of_df_logs = glob(preprocessed_day_logs_path + '/**/*{}.csv'.format(log_level), recursive=True)
                 #concatenate all the logs of the day
+                print("concatenating logs from{}: {}".format(log_level, list_of_df_logs))
+                if len(list_of_df_logs) == 0:
+                    continue
                 df_logs = pd.concat([pd.read_csv(log) for log in list_of_df_logs])
                 #compress the logs with a threshold of higher threshold 
-                compressed_df = get_compressed_logs_df(df_logs, 0.5)
+                compressed_df = get_compressed_logs_df(df_logs, 0.5, log_level)
                 #save the compressed logs
                 compressed_df.to_csv(os.path.join(preprocessed_day_logs_path, "compressed_daily_{}.csv".format(log_level)), index=False)
         else:
