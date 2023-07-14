@@ -38,15 +38,15 @@ def get_prompt(df):
     prompt = "#LOGS \n" + table_to_add + "\n" + prompt_template
     return prompt
 
-def ask_llm(prompt):
+def ask_llm(prompt, ip, port):
     #ask the log language model to generate a report
-    url = "http://127.0.0.1:80/query"
+    url = "http://{}:{}/query".format(ip, port)
     headers = {'Content-Type': 'application/json'}
     data = json.dumps({"userQuery": prompt})
     response = requests.post(url, headers=headers, data=data)
     return response
 
-def post_to_lhcblog(date, text):
+def post_to_lhcblog(date, text, loglevel):
     #post the response to the lhcblog
     #read from env variables
     url = os.environ['logbook_url']
@@ -58,7 +58,7 @@ def post_to_lhcblog(date, text):
         'UPWD': logbook_pwd,
         'EXP': 'TestLogbook',
         'ENCODING': 'plain',
-        'SUBJECT': 'Daily report of the System Logs for {}'.format(date),
+        'SUBJECT': 'Daily report of the System Log {} on {}'.format(loglevel, date),
         'SYSTEM': 'test',
         'TEXT': text
     }
@@ -74,6 +74,9 @@ if __name__=="__main__":
     args = parser.parse_args()
     report_day = args.report_day
     log_level = args.log_level
+    ip="localhost"
+    port=5000
+
     #if log level not one of the options, exit
     if log_level not in ['error', 'warning']:
         print("log level not one of the options: error, warning")
@@ -85,9 +88,9 @@ if __name__=="__main__":
 
     prompt_to_send = get_prompt(compressed_log)
     print(prompt_to_send)
-    llm_response = ask_llm(prompt_to_send)
+    llm_response = ask_llm(prompt_to_send, ip, port)
     reply = llm_response.json()
-    lhcb_logs_reponse = post_to_lhcblog(report_day, reply)
+    lhcb_logs_reponse = post_to_lhcblog(report_day, reply, log_level)
     print(reply)
 
 

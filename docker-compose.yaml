@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: /components/daily-reports/model-inference/flask-inference/Dockerfile
     ports:
-      - "80:80"
+      - "5000:5000"
     volumes:
       - /data:/data
     env_file:
@@ -30,7 +30,7 @@ services:
       context: .
       dockerfile: /components/daily-reports/data-export/create-daily-report/Dockerfile
     ports:
-        - "80:80"
+        - "5000:5000"
     volumes:
       - /data:/data
     env_file:
