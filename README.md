@@ -15,7 +15,7 @@ Dashboard after:
 Unfortunately the LLM's Falcon40B and LLama65b were not as good as we hoped. But the proof of concept stands, after taking the daily clustered logs (approximately 100-200 entries) and running them with GPT-4 we get the following results:
 As soon as a better LLM on Huggingface is available, we can easily switch it out and get better results.
 
-#include table and then the report of the day from GPT-4
+#include table and a daily report of the day to show 
 
 ## Image of the pipeline
 #include image of the pipeline
@@ -23,7 +23,7 @@ As soon as a better LLM on Huggingface is available, we can easily switch it out
 
 ## Run the jobs
 ### Run hourly Reindexing
-To run the hourly reindexing, simply run a cron job with the following command:
+To run the hourly reindexing, simply run a cron job with the following command hourly:
 ```
 bash run_hourly_reindexing.sh this/is/your/path/log-summary /wherever/you/want/the/cache/to/be false
 ```
