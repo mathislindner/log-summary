@@ -71,31 +71,38 @@ Meanwhile, loadbalancer-pluscc faced issues with the mailer process when attempt
 
 ---
 # "Future Work"
+<div class="container">
+    <div style="width: 55%; float: left;">
+        <ul>
+        <li> Worked on the idea of a chatbot answering questions specific to the logs
+        <li>  Main issue with this is finding the relevant information to the question:
+            <ul>
+            <li> LLM do not support huge inputs
+            <li> This is usually tackled with vectorisation and cosine similarity search with the question
+            </ul>
+        <li> Train a good vectorization transformer adapted for logs. (Most models are made to match things like synonyms and not log that are repetive)
+        </ul>
+    </div>
+    <div class="image">
+        <img src="./images/pipeline_for_llm.png"style="float: right;" alt="drawing" width=45%/>
+    </div>
 
-- Worked on the idea of a chatbot answering questions specific to the logs
-- Main issue with this is finding the relevant information to the question:
-    - LLM do not support huge inputs
-    - This is usually tackled with vectorisation and cosine similarity search with the question
-=> Train a good vectorization transformer adapted for logs. (Most models are made to match things like synonyms and not log that are repetive)
-
----
-
-![w:600](./images/pipeline_for_llm.png) 
+</div>
 
 --- 
 # Quick Demo of method 2
 - Using Langchain
-Give the LLM a Prompt telling it how it can access a table and access its information
-Tell it how it should go through with thought processes.
-Add the relevant question.
-Let it generate sequentially new “thoughts”
-
----
-- Using Langchain module
+- Give the LLM a Prompt telling it how it can access a table and access its information
+- Tell it how it should go through with thought processes.
+- Add the relevant question.
+- Let it generate sequentially new “thoughts”
 - Limitations on the complexity of the question. Need more specific training on log understanding
 - The most complicated things you can ask is a simple, what happened to host xyz and it can find the logs specific to the question and summarize them a bit.
 - The problem is if too many things happened, not everything can fit in the model input, so there needs to be a form a compression.
+
+---
 #add image of conv
+
 ---
 # Thank you for your attention
 
