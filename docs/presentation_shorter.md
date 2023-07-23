@@ -6,7 +6,7 @@ paginate: true
 # Leveraging the Power of Transfomers for Log Supervision
 ### Supervised by Aristeidis Fkiaras
 
-A quick peek over the project I was assigned from mid-May to mid-July 2023
+A quick peek over the project I was assigned from mid-June to mid-July 2023
 
 ###### Mathis Lindner
 
@@ -23,7 +23,7 @@ A quick peek over the project I was assigned from mid-May to mid-July 2023
 
 - Supervising logs is tedious
 	- Even with good filters
-	- similar messages but not exactly the same
+	- Similar messages but not exactly the same
 	- Same messages but on different hosts
 - Cannot store logs forever
 	- Adding an entry to the logbook can help
@@ -157,7 +157,7 @@ Meanwhile, loadbalancer-pluscc faced issues with the mailer process when attempt
 	<div style="width: 55%; float: left;">
 		<ul>
 		<li> Idea of chatbot answering questions specific to the logs
-		<li>  <b>Issue:</b> Most LLM's do not support large inputs 
+		<li>  <b>Issue:</b> Most Large Language Models do not support long inputs 
 		<li>  <b>Idea:</b> Only give it access the logs relevant to the question using cosimilarity search on their embeddings.
 		<li> <b>Need:</b> To train a good sentence transformer adapted for logs. (Most models are trained on forums news and other text sources and do not perform well on logs)
 		<li> <b>Need:</b> To find a way to deal with time related questions with method 1.
@@ -173,7 +173,7 @@ Meanwhile, loadbalancer-pluscc faced issues with the mailer process when attempt
 # Quick Demo of method 2
 - Using Langchain module
 	- Prompt LLM on how it can access information.
-	- Tell it that it needs to use a specific thought processes.
+	- Tell the LLM that it needs to use a specific thought process.
 	- Add the question after this prompt.
 
 **Sidenote** 
