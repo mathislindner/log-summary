@@ -1,30 +1,32 @@
 ---
 marp: true
+paginate: true
 ---
+<!-- _paginate: skip -->
+# Leveraging the Power of Transfomers for Log Supervision
+### Supervised by Aristeidis Fkiaras
 
-# Leveraging the Power of Transfomers
-# for Log Supervision
-
-
-A quick overview over the project I was assigned from May to July 2023
+A quick peek over the project I was assigned from mid-May to mid-July 2023
 
 ---
+<!-- _paginate: skip -->
 # Quick overview
-1. Problem at hand
+1. Problem(s) at hand
 2. Log Reduction
 3. Logbook Reports
 4. Future Work
 
 ---
 # Problems at hand
-- Logs can be tedious to read, even with a good filters 
-	- similar messages but not exact matches, makes it harder to filter.
-	- also very repetitive on multiple hosts.
-- Adding an entry to the logbook can be useful to keep track of the issues that could be encountered later, but we cannot store them forever.
-- It can be easier to inteact with the logs with plain text
+
+- Logs can be tedious to read, even with good filters 
+	- Similar messages but not exact matches, makes it harder to reduce the number of logs.
+	- Can be very repetitive accross multiple hosts.
+- Adding an entry to the logbook can be useful to keep track of the issues that could be encountered later, because we cannot store all of the logs forever.
+
 ---
 # Log Reduction
-To tackle the problem of repetetive logs we chose to use a sentence transformer to vectorise the logs and a hierarchical clustering to group similar logs together.
+To tackle the problem of repetetive logs we chose to use a sentence transformer to vectorise the logs and a hierarchical clustering to group similar logs together and send them back to opensearch as a new index each hour.
 
 
 ![word2vec, w:500](./images/downloaded_images/word2vec.png "title") ![hierarchical clustering,  width:500](./images/downloaded_images/hierarchical_clustering.png)
@@ -119,8 +121,8 @@ To tackle the problem of repetetive logs we chose to use a sentence transformer 
 - Use the hourly summaries, re-vectorise them and cluster them again to get a summary of the day.
 	- alot of logs also repeat throughout the day, so we can use the same method to reduce the number of logs again.
 - Use an LLM to generate a summary of the day in sentences, while trying to keep the relevant information.
-- We tried a few open-source models and ran them locally for privacy reasons, but the results were not satisfying.
-- For demonstration purposes we used the OpenAI's GPT-3.5
+- We tried a few open-source models and ran them locally for privacy independency reasons, but the results were not satisfying.
+- So for demonstration purposes we used the OpenAI's GPT-3.5
 
 ---
 **System Log Report - July 12, 2023**
@@ -144,17 +146,17 @@ Meanwhile, loadbalancer-pluscc faced issues with the mailer process when attempt
 
 
 ---
-# "Future Work"
+# Future Work
 <div class="container">
 	<div style="width: 55%; float: left;">
 		<ul>
-		<li> Worked on the idea of a chatbot answering questions specific to the logs
+		<li> Started working on the idea of a chatbot answering questions specific to the logs
 		<li>  Main issue with this is finding the relevant information to the question:
 			<ul>
-			<li> LLM do not support huge inputs
-			<li> This is usually tackled with vectorisation and cosine similarity search with the question
+				<li> Most LLM's do not support large inputs
+				<li> This is usually tackled again with vectorisation and then cosine similarity search with the question but we do not have a good vectorisation for logs.
 			</ul>
-		<li> Train a good vectorization transformer adapted for logs. (Most models are made to match things like synonyms and not log that are repetive)
+		<li> Train a good sentence transformer adapted for logs. (Most models are made to match things like synonyms and not log that are repetive)
 		</ul>
 	</div>
 	<div class="image">
@@ -165,14 +167,12 @@ Meanwhile, loadbalancer-pluscc faced issues with the mailer process when attempt
 
 --- 
 # Quick Demo of method 2
-- Using Langchain
-- Give the LLM a Prompt telling it how it can access a table and access its information
-- Tell it how it should go through with thought processes.
-- Add the relevant question.
-- Let it generate sequentially new “thoughts”
-- Limitations on the complexity of the question. Need more specific training on log understanding
-- The most complicated things you can ask is a simple, what happened to host xyz and it can find the logs specific to the question and summarize them a bit.
-- The problem is if too many things happened, not everything can fit in the model input, so there needs to be a form a compression.
+- Using Langchain module
+	- Give the LLM a Prompt telling it how it can access a table and access its information
+	- Tell it that it shouldanswer questions using a specific thought processes.
+	- Add the relevant question after the prompt.
+- Unfortunately there were limitations on the complexity of the question. The models we tried from huggingface would need more specific training on log understanding
+	- The most complicated things you can ask is a simple, what happened to host xyz and it can find the logs specific to the question and summarize them a bit.
 
 ---
 **Question**: What is the last log entry?
