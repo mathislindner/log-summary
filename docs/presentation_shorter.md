@@ -3,7 +3,7 @@ marp: true
 paginate: true
 ---
 <!-- _paginate: skip -->
-# Leveraging the Power of Transfomers for Log Supervision
+# Leveraging the Transfomers for Log Supervision
 ### Supervised by Aristeidis Fkiaras
 
 A quick peek over the project I was assigned from mid-June to mid-July 2023
@@ -21,12 +21,12 @@ A quick peek over the project I was assigned from mid-June to mid-July 2023
 ---
 # Problems at hand
 
-- Supervising logs is tedious
+- Supervising system logs can be tedious
 	- Even with good filters
 	- Similar messages but not exactly the same
-	- Same messages but on different hosts
+	- Similar messages but on different hosts
 - Cannot store logs forever
-	- Adding an entry to the logbook can help
+	- Adding an entry to the logbook instead of storing all the logs.
 
 ---
 # Log Reduction
@@ -125,9 +125,10 @@ A quick peek over the project I was assigned from mid-June to mid-July 2023
 ---
 # Logbook Reports
 - Vectorise the hourly logs (some of them are repeated each hour)
-- Cluster them too 
-- Ask to get a summary from an LLM to send it to the LHCb logbook.
-- We tried a few open-source models (Falcon 40b, Llama 65b) and ran them locally for privacy independency reasons, but the results were not satisfying.
+- Cluster them as well 
+- Ask to get a summary from a Large Language Model to send it to the LHCb logbook.
+- We tried a few open-source models (Falcon 40b, Llama 65b) and ran them locally for privacy/independency reasons, but the results were not satisfying.
+	- Only a matter of time until open-source models can do that too.
 - So for demonstration purposes we used the OpenAI's GPT-3.5 for the following...
 
 ---
