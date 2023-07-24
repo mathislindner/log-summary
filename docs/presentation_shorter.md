@@ -3,21 +3,12 @@ marp: true
 paginate: true
 ---
 <!-- _paginate: skip -->
-# Leveraging the Transfomers for Log Supervision
+# Using Transfomers for Log Supervision
 ### Supervised by Aristeidis Fkiaras
 
 A quick peek over the project I was assigned from mid-June to mid-July 2023
 
 ###### Mathis Lindner
-
----
-<!-- _paginate: skip -->
-# Quick overview
-1. Problem(s) at hand
-2. Log Reduction
-3. Logbook Reports
-4. Future Work
-
 ---
 # Problems at hand
 
@@ -167,19 +158,20 @@ Meanwhile, loadbalancer-pluscc faced issues with the mailer process when attempt
 	<div class="image">
 		<img src="./images/pipeline_for_llm.png"style="float: right;" alt="drawing" width=45%/>
 	</div>
+	<! Sidenote: basic sentence transformers were good enough to compare the logs to eachother, but doing it with a question just does not work as well>
 
 </div>
 
 --- 
 # Quick Demo of method 2
-- Using Langchain module
+- Using [Langchain module](https://github.com/langchain-ai/langchain)
 	- Prompt LLM on how it can access information.
 	- Tell the LLM that it needs to use a specific thought process.
 	- Add the question after this prompt.
 
 **Sidenote** 
 - Unfortunately there are limitations on complexity of the question. 
-- Models we tried from huggingface are not performing well on other tasks than conversation yet.
+- Models we tried from [huggingface](https://huggingface.co/models?pipeline_tag=text2text-generation&sort=trending) are not performing well on other tasks than conversation yet.
 - The most complicated things you can ask is a simple: 
 	- "what happened to host xyz"
 	- can find logs specific to the question and summarize them a bit.
@@ -229,7 +221,7 @@ Name: 9999, dtype: object
 # Thank you for your attention
 
 ---
-Technical slides
+More slides
 
 ---
 ![daily hourly pipe](./images/daily_log_summary.png "title")
